@@ -20,3 +20,9 @@ functions:
       - http:
           path: user/{userId}
           method: get
+  patchUser:
+    handler: src/controllers.patchUser
+    events:
+      - http:
+          path: user/{userId}
+          method: patch

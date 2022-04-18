@@ -4,7 +4,8 @@ import {
     ConnectionManager,
     createConnection,
     getConnectionManager,
-    QueryRunner
+    QueryRunner,
+    EntityManager
 } from "typeorm";
 
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
@@ -59,7 +60,16 @@ export class Database {
             const connectionOptions = setEnvOptions()
             connection = await createConnection(connectionOptions)
         }
-        return connection
+        return connection;
+    }
+
+    public async withQuery(action){
+        const connection: Connection = await this.getConnection();
+        const manager: EntityManager = connection.manager;
+
+        const result = await action(manager);
+
+        return result;
     }
 
     public async withTransaction(action) {

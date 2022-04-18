@@ -1,4 +1,4 @@
-import {Repository} from "typeorm";
+import {Repository, Connection, EntityManager, QueryRunner} from "typeorm";
 
 import {User} from "../entities";
 import {Database} from "../config/database";
@@ -9,21 +9,41 @@ export default class UserDao {
         this.db = db;
     }
 
-    async getManager(){
-        const connection = await this.db.getConnection();
-        
-        return connection.manager
+    async createUser(request){
+        const result = await this.db.withTransaction(async(qr) => {
+            const userRepository = qr.manager.getRepository(User);
+            const user = new User()
+
+            return result;
+        })
     }
 
     async getUser(userId: number){
-        const manager = await this.getManager()
-        const userRepository: Repository<User> = manager.getRepository(User);
+        const result = await this.db.withQuery(async(mg) => {
+            const userRepository = mg.getRepository(User);
+            const user = await userRepository.findOne({id:userId})
 
-        const result: User = await userRepository.findOne({
-            id: userId
-        });
+            if (user == null){
+                throw new Error(`User id ${userId} does not exist.`);
+            }
+            return user
+        })
+    
+        return result;
+    }
 
-        return result
+    async patchUser(userId: number, request){
+        const result = await this.db.withTransaction(async(qr) => {
+            const userRepository = qr.manager.getRepository(User);
+            const user = await userRepository.findOne({id:userId});
+            
+            if (user == null){
+                throw new Error(`User id ${userId} does not exist.`);
+            }
+            
+        })
+
+        return result;
     }
 
 }
