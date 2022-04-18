@@ -6,7 +6,8 @@ import {
     OneToMany,
     JoinColumn,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
+    Generated
 } from 'typeorm';
 
 import User from './user';
@@ -23,7 +24,7 @@ export default class PresentList {
 
     @Column({
         name: "NAME",
-        type: "varchar",
+        type: "nvarchar",
         length: 200,
         nullable: false
     })
@@ -36,14 +37,6 @@ export default class PresentList {
         nullable: true,
     })
     description: string;
-
-    @Column({
-        name: "MEMBER_COUNT",
-        type: "bigint",
-        unsigned: true,
-        default: 0
-    })
-    memberCount: number;
 
     @ManyToOne(
         _=> User

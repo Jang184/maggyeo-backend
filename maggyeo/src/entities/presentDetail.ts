@@ -5,7 +5,8 @@ import {
     ManyToOne,
     JoinColumn,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
+    Generated
 } from 'typeorm';
 
 import presentList from './presentList';
@@ -18,7 +19,7 @@ export default class PresentDetail {
         unsigned: true
     })
     id: number;
-
+    
     @Column({
         name: "URL",
         type: "varchar",
@@ -26,6 +27,27 @@ export default class PresentDetail {
         nullable: false
     })
     url: string;
+
+    @Column({
+        name: "DESCRIPTION",
+        type: "nvarchar",
+        length: 1000
+    })
+    description: string;
+
+    @Column({
+        name: "COUNT_LIMIT",
+        type: "int",
+        unsigned: true
+    })
+    countLimit: number;
+
+    @Column({
+        name: "COUNT_NOW",
+        type: "int",
+        unsigned: true
+    })
+    countNow: number;
 
     @ManyToOne(
         _=> presentList

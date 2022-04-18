@@ -11,8 +11,8 @@ import {
 import User from './user';
 import PresentList from './presentList';
 
-@Entity("MEMBER")
-export default class Member {
+@Entity("PARTICIPATE")
+export default class Participate {
     @PrimaryGeneratedColumn({
         name: "ID",
         type: "bigint",
@@ -22,18 +22,18 @@ export default class Member {
 
     @Column({
         name: "MESSAGE",
-        type: "varchar",
+        type: "nvarchar",
         length: 500,
         nullable: false
     })
     message: string;
 
     @ManyToOne(_=> User)
-    @JoinColumn({ name: "USER_ID" })
-    user: User;
+    @JoinColumn({ name: "PARTICIPANT_ID" })
+    participant: User;
     
     @ManyToOne(_=> PresentList)
-    @JoinColumn({ name: "PRESENT_ID" })
+    @JoinColumn({ name: "LIST_ID" })
     presentList: PresentList
 
     @CreateDateColumn({

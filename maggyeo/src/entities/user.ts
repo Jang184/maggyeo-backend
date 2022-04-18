@@ -4,7 +4,8 @@ import {
     Column,
     OneToMany,
     CreateDateColumn,
-    UpdateDateColumn
+    UpdateDateColumn,
+    Generated
 } from 'typeorm';
 
 import PresentList from './presentList';
@@ -20,7 +21,7 @@ export default class User {
 
     @Column({
         name: "NAME",
-        type: "varchar",
+        type: "nvarchar",
         length: 10,
         nullable: false
     })
