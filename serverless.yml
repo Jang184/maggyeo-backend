@@ -26,3 +26,8 @@ functions:
       - http:
           path: user/{userId}
           method: patch
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-dotenv-plugin

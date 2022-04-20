@@ -4,7 +4,6 @@ import {User} from "../entities";
 import {Database} from "../config/database";
 
 export default class UserDao {
-    
     constructor(private db: Database){
         this.db = db;
     }

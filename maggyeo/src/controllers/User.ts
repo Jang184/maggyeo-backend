@@ -3,18 +3,20 @@ import {
     doNotWaitForEmptyEventLoop,
     httpHeaderNormalizer,
     jsonBodyParser
-} from "middy/middlewares"
+} from "middy/middlewares";
+import {
+    initMiddleware
+} from "../utils/middlewares"
 
 import { Database } from "../config/database"
 import { User } from "../entities";
 import { UserDao } from "../models"
 
-const getUser = async (event) => {
+const getUser = async (event, context) => {
     const {userId} = event.pathParameters["userId"];
-    const db = new Database()
+    const services = context["services"];
 
-    const userDao = new UserDao(db);
-    const user: User = await userDao.getUser(userId);
+    const user: User = await services.userService.getUser(userId);
 
     return {
         statusCode: 200,
@@ -34,6 +36,7 @@ const wrappedGetUser = middy(getUser)
     .use(httpHeaderNormalizer())
     .use(doNotWaitForEmptyEventLoop())
     .use(jsonBodyParser())
+    .use(initMiddleware())
 
 const wrappedPatchUser = middy(patchUser)
     .use(httpHeaderNormalizer())
