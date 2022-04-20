@@ -2,32 +2,33 @@ service: maggyeo
 frameworkVersion: "3"
 
 custom:
-  stage: ${opt:stage, 'dev'}
+    stage: ${opt:stage, 'dev'}
 
 provider:
-  name: aws
-  runtime: nodejs14.x
-  region: ap-northeast-2
-  stage: ${opt:stage, 'dev'}
-  environment:
-    stage: ${self:provider.stage}
-    TARGET_ENV: ${self:provider.stage}
+    name: aws
+    runtime: nodejs14.x
+    region: ap-northeast-2
+    stage: ${opt:stage, 'dev'}
+    environment:
+        stage: ${self:provider.stage}
+        TARGET_ENV: ${self:provider.stage}
 
 functions:
-  getUser:
-    handler: src/controllers.getUser
-    events:
-      - http:
-          path: user/{userId}
-          method: get
-  patchUser:
-    handler: src/controllers.patchUser
-    events:
-      - http:
-          path: user/{userId}
-          method: patch
+    getUser:
+        handler: src/controllers/index.getUser
+        events:
+            - http:
+                  path: user/{userId}
+                  method: get
+
+    createUser:
+        handler: src/controllers/index.createUser
+        events:
+            - http:
+                  path: user
+                  method: post
 
 plugins:
-  - serverless-plugin-typescript
-  - serverless-offline
-  - serverless-dotenv-plugin
+    - serverless-plugin-typescript
+    - serverless-offline
+    - serverless-dotenv-plugin
