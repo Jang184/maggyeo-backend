@@ -5,7 +5,12 @@
     "main": "index.js",
     "scripts": {
         "test": "jest",
-        "lint": "eslint *.ts"
+        "lint": "eslint *.ts",
+        "documentation": "apidoc -i src/controllers -o apidoc"
+    },
+    "apidoc": {
+        "title": "maggyeo-backend api documentation",
+        "url": "https://maggyeo.com"
     },
     "author": "",
     "license": "ISC",
@@ -15,6 +20,7 @@
         "@types/node": "^17.0.23",
         "@typescript-eslint/eslint-plugin": "^5.18.0",
         "@typescript-eslint/parser": "^5.18.0",
+        "apidoc": "^0.51.1",
         "eslint": "^8.10.0",
         "jest": "^27.5.1",
         "jest-cli": "^27.5.1",

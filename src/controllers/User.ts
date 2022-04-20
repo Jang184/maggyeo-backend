@@ -10,6 +10,20 @@ import { Database } from "../config/database";
 import { User } from "../entities";
 import { UserDao } from "../models";
 
+/**
+ * @api {get}   /user/:userId   Get User
+ * @apiName GetUser
+ * @apiGroup User
+ *
+ * @apiParam (pathParam) {Number}   userId  Users pk ID
+ * @apiParamExample {text}  Request
+ * GET /user/418
+ *
+ * @apiSuccess (200 OK) {String}    name  user's name
+ * @apiSuccess (200 OK) {String}    email user's email
+ * @apiSuccess (200 OK) {String}    profileUrl  user's url of profile image
+ *
+ */
 const getUser = async (event, context) => {
     const userId = event.pathParameters["userId"];
     const services = context["services"];
