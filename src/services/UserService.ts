@@ -10,7 +10,7 @@ export class UserService {
     getUser(id: number) {
         return this.userDao.getUser(id);
     }
-    createUser() {
-        return this.userDao.createUser();
+    createUser(name: string, email: string) {
+        return this.userDao.createUser(name, email);
     }
 }

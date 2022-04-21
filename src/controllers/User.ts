@@ -38,8 +38,9 @@ const getUser = async (event, context) => {
 
 const createUser = async (event, context) => {
     const services = context["services"];
+    const { name, email, data } = event.body;
 
-    await services.userService.createUser();
+    await services.userService.createUser(name, email);
 
     return {
         statusCode: 201,
@@ -47,8 +48,8 @@ const createUser = async (event, context) => {
     };
 };
 
-const patchUser = async (event) => {
-    const { userId } = event.pathParameters["userId"];
+const patchUser = async (event, context) => {
+    const userId = event.pathParameters["userId"];
     const request = event.body;
     const db = new Database();
 
