@@ -5,17 +5,21 @@ import {
     OneToMany,
     CreateDateColumn,
     UpdateDateColumn,
-    Generated
-} from 'typeorm';
+    Generated,
+    ManyToMany,
+    JoinTable,
+} from "typeorm";
 
-import PresentList from './presentList';
+import PresentList from "./presentList";
+import PresentDetail from "./presentDetail";
+import Participate from "./participate";
 
 @Entity("USER")
 export default class User {
     @PrimaryGeneratedColumn({
         name: "ID",
         type: "bigint",
-        unsigned: true
+        unsigned: true,
     })
     id: number;
 
@@ -23,7 +27,7 @@ export default class User {
         name: "NAME",
         type: "nvarchar",
         length: 10,
-        nullable: false
+        nullable: false,
     })
     name: string;
 
@@ -32,7 +36,7 @@ export default class User {
         type: "varchar",
         length: 20,
         nullable: false,
-        unique: true
+        unique: true,
     })
     email: string;
 
@@ -40,7 +44,7 @@ export default class User {
         name: "PASSWORD",
         type: "varchar",
         length: 100,
-        nullable: false
+        nullable: false,
     })
     password: string;
 
@@ -48,25 +52,22 @@ export default class User {
         name: "PROFILE_URL",
         type: "varchar",
         length: 500,
-        nullable: true
+        nullable: true,
     })
     profileUrl: string;
 
-    @OneToMany(
-        _=> PresentList,
-        present => present.user,
-        { cascade: ["insert", "update"]}
-    )
+    @OneToMany((_) => PresentList, (present) => present.user, {
+        cascade: ["insert", "update"],
+    })
     presents: PresentList[];
 
     @CreateDateColumn({
-        name: "CREATED_AT"
+        name: "CREATED_AT",
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        name: "UPDATED_AT"
+        name: "UPDATED_AT",
     })
     updatedAt: Date;
 }
-

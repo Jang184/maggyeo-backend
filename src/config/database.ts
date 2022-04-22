@@ -37,33 +37,37 @@ const setEnvOptions = () => {
     return connectionOption;
 };
 
-export class Database {
-    public async getConnection() {
-        let connection: Connection;
-        const connectionManager: ConnectionManager = getConnectionManager();
+export const getConnection = async () => {
+    let connection: Connection;
+    const connectionManager: ConnectionManager = getConnectionManager();
 
-        if (connectionManager.has("default")) {
-            connection = connectionManager.get("default");
-        }
-        if (!connection) {
-            const connectionOptions = setEnvOptions();
-            connection = await createConnection(connectionOptions);
-        }
-        return connection;
+    if (connectionManager.has("default")) {
+        connection = connectionManager.get("default");
+        console.log("connection already exist");
+    }
+    if (!connection) {
+        const connectionOptions = setEnvOptions();
+        connection = await createConnection(connectionOptions);
+        console.log("create new connection");
+    }
+    return connection;
+};
+
+export class Database {
+    constructor(private connection: Connection) {
+        this.connection = connection;
     }
 
-    public async withQuery(action) {
-        const connection: Connection = await this.getConnection();
-        const manager: EntityManager = connection.manager;
+    public async getConnection() {
+        return this.connection;
+    }
 
-        const result = await action(manager);
-
-        return result;
+    public async query(action) {
+        return await action(this.connection);
     }
 
     public async withTransaction(action) {
-        const connection: Connection = await this.getConnection();
-        const queryRunner: QueryRunner = connection.createQueryRunner();
+        const queryRunner: QueryRunner = this.connection.createQueryRunner();
 
         await queryRunner.connect();
         await queryRunner.startTransaction();

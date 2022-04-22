@@ -7,7 +7,9 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     Generated,
+    OneToMany,
 } from "typeorm";
+import { Participate } from ".";
 
 import presentList from "./presentList";
 

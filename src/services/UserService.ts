@@ -10,12 +10,13 @@ export class UserService {
         return this.userDao.createUser(name, email);
     }
     getUser(userId: number) {
-        const user = {
-            userInfo: this.userDao.getUser(userId),
-            userList: this.userDao.getUserList(userId),
-            userParticipate: this.userDao.getUserParticipate(userId),
-            userReceivedMessage: this.userDao.getUserReceivedMessage(userId),
-        };
+        const user = this.userDao.getUserReceivedMessage(userId);
+        // const user = {
+        //     userInfo: this.userDao.getUser(userId),
+        //     userList: this.userDao.getUserList(userId),
+        //     userParticipate: this.userDao.getUserParticipate(userId),
+        //     userReceivedMessage: this.userDao.getUserReceivedMessage(userId),
+        // };
         return user;
     }
     patchUser(

@@ -1,7 +1,4 @@
-import {
-    UserService
-} from "./UserService";
+import { UserService } from "./UserService";
+import { PresentService } from "./PresentService";
 
-export {
-    UserService
-};
+export { UserService, PresentService };

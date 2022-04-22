@@ -46,7 +46,7 @@ export default class PresentList {
         (presentDetail) => presentDetail.presentList,
         { cascade: ["insert", "update"] }
     )
-    presentDetails: PresentDetail[];
+    presentDetail: PresentDetail[];
 
     @CreateDateColumn({
         name: "CREATED_AT",

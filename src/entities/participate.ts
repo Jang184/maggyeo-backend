@@ -6,6 +6,8 @@ import {
     JoinColumn,
     CreateDateColumn,
     UpdateDateColumn,
+    ManyToMany,
+    JoinTable,
 } from "typeorm";
 
 import User from "./user";
@@ -29,8 +31,8 @@ export default class Participate {
     message: string;
 
     @ManyToOne((_) => User)
-    @JoinColumn({ name: "PARTICIPANT_ID" })
-    participant: User;
+    @JoinColumn({ name: "USER_ID" })
+    user: User;
 
     @ManyToOne((_) => PresentDetail)
     @JoinColumn({ name: "DETAIL_ID" })

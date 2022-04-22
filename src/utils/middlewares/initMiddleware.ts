@@ -1,18 +1,18 @@
-import { getServices } from "../../index"
-import { Database } from "../../config/database";
+import { getServices } from "../../index";
+import { Database, getConnection } from "../../config/database";
 import { HandlerLambda } from "middy";
 
 const initMiddleware = () => {
-    const db = new Database();
-    
     return {
-        before: async(handler: HandlerLambda) => {
-
+        before: async (handler: HandlerLambda) => {
+            const connection = await getConnection();
+            const db = new Database(connection);
+            console.log("start init");
             const services = getServices(db);
             handler.context["services"] = services;
             return;
-        }
-    }
-}
+        },
+    };
+};
 
 export default initMiddleware;

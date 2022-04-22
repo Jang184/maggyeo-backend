@@ -1,6 +1,6 @@
 import { Repository, Connection, EntityManager, QueryRunner } from "typeorm";
 
-import { Participate, PresentList, User } from "../entities";
+import { Participate, PresentList, PresentDetail, User } from "../entities";
 import { Database } from "../config/database";
 
 export default class UserDao {
@@ -23,68 +23,73 @@ export default class UserDao {
     }
 
     async getUser(userId: number) {
-        const result = await this.db.withQuery(async (mg) => {
-            const userRepository = mg.getRepository(User);
-
-            const user: User = await userRepository.findOne({
-                select: ["id", "name", "email", "profileUrl"],
-                where: {
-                    id: userId,
-                },
-            });
+        const result = await this.db.query(async (connection) => {
+            // {id:2, name:Juri}
+            const user: User = await connection
+                .createQueryBuilder(User, "user")
+                .select([
+                    "user.id",
+                    "user.name",
+                    "user.email",
+                    "user.profile_url",
+                ])
+                .where("user.id = :id", { id: userId })
+                .getOne();
 
             if (user == null) {
                 throw new Error(`User id ${userId} does not exist.`);
             }
-
             return user;
         });
-
         return result;
     }
     // TODO:pagination
     async getUserList(userId: number) {
-        const result = await this.db.withQuery(async (mg) => {
-            const presentListRepository = mg.getRepository(PresentList);
+        const result = await this.db.query(async (connection) => {
+            // [{id:1, name:test, description:test, createdAt:...}]
+            const userList: PresentList = await connection
+                .createQueryBuilder(PresentList, "list")
+                .select(["list.id", "detail.id", "part.id"])
+                .leftJoin(
+                    "list.presentDetail",
+                    "detail",
+                    "list.id = detail.list_id"
+                )
+                .leftJoin(Participate, "part", "detail.id = part.detail_id")
+                .where("list.user_id = :id", { id: userId })
+                .getMany();
 
-            const list: PresentList = await presentListRepository.find({
-                select: ["name", "createdAt"],
-                where: {
-                    user: userId,
-                },
-            });
-            return list;
+            return userList;
         });
         return result;
     }
+
     // List user participated
     async getUserParticipate(userId: number) {
-        const result = await this.db.withQuery(async (mg) => {
-            const participateRepository = mg.getRepository(Participate);
-
-            const participate: Participate = await participateRepository.find({
-                relations: ["presentDetail", "presentDetail.presentList"],
-                where: {
-                    participant: userId,
-                },
-            });
-            return participate;
+        const result = await this.db.query(async (connection) => {
+            const userParticipate = await connection
+                .createQueryBuilder(Participate, "part")
+                .leftJoinAndSelect("part.presentDetail", "presentDetail")
+                .where("part.user_id = :id", { id: userId })
+                .getMany();
+            return userParticipate;
         });
+
         return result;
     }
 
     // Message user received
     async getUserReceivedMessage(userId: number) {
-        const result = await this.db.withQuery(async (mg) => {
-            const participateRepository = mg.getRepository(Participate);
-
-            const message = await participateRepository
-                .createQueryBuilder("participate")
-                // .select("participate.message", "user.name")
-                .leftJoinAndSelect("participate.presentDetail", "presentDetail")
-                .leftJoinAndSelect("presentDetail.presentList", "presentList")
-                .leftJoinAndSelect("presentList.user", "user")
-                .where("presentList.user = :userId", { userId: userId })
+        const result = await this.db.query(async (connection) => {
+            const message = await connection
+                .createQueryBuilder(Participate, "part")
+                .leftJoinAndSelect(
+                    PresentDetail,
+                    "detail",
+                    "part.detail_id = detail.id"
+                )
+                .leftJoin(PresentList, "list", "detail.list_id = list.id")
+                .where("list.user_id = :id", { id: userId })
                 .getMany();
             return message;
         });
