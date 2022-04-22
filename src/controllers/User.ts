@@ -7,7 +7,7 @@ import {
 import { initMiddleware } from "../utils/middlewares";
 
 import { Database } from "../config/database";
-import { User } from "../entities";
+import { User, PresentList } from "../entities";
 import { UserDao } from "../models";
 
 /**
@@ -48,14 +48,6 @@ const createUser = async (event, context) => {
     };
 };
 
-const patchUser = async (event, context) => {
-    const userId = event.pathParameters["userId"];
-    const request = event.body;
-    const db = new Database();
-
-    const userDao = new UserDao(db);
-    const user = await userDao.patchUser(userId, request);
-};
 const wrappedGetUser = middy(getUser)
     .use(httpHeaderNormalizer())
     .use(doNotWaitForEmptyEventLoop())

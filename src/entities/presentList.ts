@@ -7,18 +7,17 @@ import {
     JoinColumn,
     CreateDateColumn,
     UpdateDateColumn,
-    Generated
-} from 'typeorm';
+} from "typeorm";
 
-import User from './user';
-import PresentDetail from './presentDetail';
+import User from "./user";
+import PresentDetail from "./presentDetail";
 
 @Entity("PRESENT_LIST")
 export default class PresentList {
     @PrimaryGeneratedColumn({
         name: "ID",
         type: "bigint",
-        unsigned: true
+        unsigned: true,
     })
     id: number;
 
@@ -26,7 +25,7 @@ export default class PresentList {
         name: "NAME",
         type: "nvarchar",
         length: 200,
-        nullable: false
+        nullable: false,
     })
     name: string;
 
@@ -38,27 +37,24 @@ export default class PresentList {
     })
     description: string;
 
-    @ManyToOne(
-        _=> User
-    )
+    @ManyToOne((_) => User)
     @JoinColumn({ name: "USER_ID" })
     user: User;
 
     @OneToMany(
-        _=> PresentDetail,
-        presentDetail => presentDetail.presentList,
+        (_) => PresentDetail,
+        (presentDetail) => presentDetail.presentList,
         { cascade: ["insert", "update"] }
     )
     presentDetails: PresentDetail[];
 
     @CreateDateColumn({
-        name: "CREATED_AT"
+        name: "CREATED_AT",
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        name: "UPDATED_AT"
+        name: "UPDATED_AT",
     })
     updatedAt: Date;
 }
-

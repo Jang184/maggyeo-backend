@@ -6,11 +6,16 @@ export class UserService {
     constructor(userDao: UserDao) {
         this.userDao = userDao;
     }
-
-    getUser(id: number) {
-        return this.userDao.getUser(id);
-    }
     createUser(name: string, email: string) {
         return this.userDao.createUser(name, email);
+    }
+    getUser(userId: number) {
+        const user = {
+            userInfo: this.userDao.getUser(userId),
+            userList: this.userDao.getUserList(userId),
+            userParticipate: this.userDao.getUserParticipate(userId),
+            userReceivedMessage: this.userDao.getUserReceivedMessage(userId),
+        };
+        return user;
     }
 }

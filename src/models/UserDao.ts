@@ -25,38 +25,11 @@ export default class UserDao {
     async getUser(userId: number) {
         const result = await this.db.withQuery(async (mg) => {
             const userRepository = mg.getRepository(User);
-            const presentListRepository = mg.getRepository(PresentList);
-            const participateRepository = mg.getRepository(Participate);
 
-            // 회원정보
             const user: User = await userRepository.findOne({
-                relations: ["presents"],
                 select: ["id", "name", "email", "profileUrl"],
                 where: {
                     id: userId,
-                },
-            });
-
-            // 참여목록
-            const participate: Participate[] = await participateRepository.find(
-                {
-                    relations: ["participant", "presentList"],
-                    where: {
-                        participant: user,
-                    },
-                    select: ["message", "presentList.name", "presentList.url"],
-                    order: {
-                        createdAt: "DESC",
-                    },
-                }
-            );
-            // 메시지
-            const message = await participateRepository.find({});
-
-            // 내 리스트
-            const presentList: PresentList = await presentListRepository.find({
-                where: {
-                    user: user,
                 },
             });
 
@@ -69,17 +42,52 @@ export default class UserDao {
 
         return result;
     }
+    // TODO:pagination
+    async getUserList(userId: number) {
+        const result = await this.db.withQuery(async (mg) => {
+            const presentListRepository = mg.getRepository(PresentList);
 
-    async patchUser(userId: number, request) {
-        const result = await this.db.withTransaction(async (qr) => {
-            const userRepository = qr.manager.getRepository(User);
-            const user = await userRepository.findOne({ id: userId });
-
-            if (user == null) {
-                throw new Error(`User id ${userId} does not exist.`);
-            }
+            const list: PresentList = await presentListRepository.find({
+                select: ["name", "createdAt"],
+                where: {
+                    user: userId,
+                },
+            });
+            return list;
         });
+        return result;
+    }
+    // List user participated
+    async getUserParticipate(userId: number) {
+        const result = await this.db.withQuery(async (mg) => {
+            const participateRepository = mg.getRepository(Participate);
 
+            const participate: Participate = await participateRepository.find({
+                relations: ["presentDetail", "presentDetail.presentList"],
+                where: {
+                    participant: userId,
+                },
+            });
+            return participate;
+        });
+        return result;
+    }
+
+    // Message user received
+    async getUserReceivedMessage(userId: number) {
+        const result = await this.db.withQuery(async (mg) => {
+            const participateRepository = mg.getRepository(Participate);
+
+            const message = await participateRepository
+                .createQueryBuilder("participate")
+                // .select("participate.message", "user.name")
+                .leftJoinAndSelect("participate.presentDetail", "presentDetail")
+                .leftJoinAndSelect("presentDetail.presentList", "presentList")
+                .leftJoinAndSelect("presentList.user", "user")
+                .where("presentList.user = :userId", { userId: userId })
+                .getMany();
+            return message;
+        });
         return result;
     }
 }

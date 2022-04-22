@@ -54,11 +54,12 @@ export default class PresentDetail {
         name: "COUNT_NOW",
         type: "int",
         unsigned: true,
+        default: 0,
     })
     countNow: number;
 
     @ManyToOne((_) => presentList)
-    @JoinColumn({ name: "PRESENT_LIST" })
+    @JoinColumn({ name: "LIST_ID" })
     presentList: presentList;
 
     @CreateDateColumn({

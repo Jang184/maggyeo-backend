@@ -5,18 +5,18 @@ import {
     ManyToOne,
     JoinColumn,
     CreateDateColumn,
-    UpdateDateColumn
-} from 'typeorm';
+    UpdateDateColumn,
+} from "typeorm";
 
-import User from './user';
-import PresentList from './presentList';
+import User from "./user";
+import PresentDetail from "./presentDetail";
 
 @Entity("PARTICIPATE")
 export default class Participate {
     @PrimaryGeneratedColumn({
         name: "ID",
         type: "bigint",
-        unsigned: true
+        unsigned: true,
     })
     id: number;
 
@@ -24,26 +24,25 @@ export default class Participate {
         name: "MESSAGE",
         type: "nvarchar",
         length: 500,
-        nullable: false
+        nullable: false,
     })
     message: string;
 
-    @ManyToOne(_=> User)
+    @ManyToOne((_) => User)
     @JoinColumn({ name: "PARTICIPANT_ID" })
     participant: User;
-    
-    @ManyToOne(_=> PresentList)
-    @JoinColumn({ name: "LIST_ID" })
-    presentList: PresentList
+
+    @ManyToOne((_) => PresentDetail)
+    @JoinColumn({ name: "DETAIL_ID" })
+    presentDetail: PresentDetail;
 
     @CreateDateColumn({
-        name: "CREATED_AT"
+        name: "CREATED_AT",
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        name: "UPDATED_AT"
+        name: "UPDATED_AT",
     })
     updatedAt: Date;
 }
-
