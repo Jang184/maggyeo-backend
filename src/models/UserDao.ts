@@ -90,4 +90,28 @@ export default class UserDao {
         });
         return result;
     }
+
+    async patchUser(
+        userId: number,
+        name?: string,
+        email?: string,
+        profile_url?: string
+    ) {
+        const result = await this.db.withTransaction(async (qr) => {
+            const userRepository = qr.manager.getRepository(User);
+
+            const user: User = await userRepository.findOne({
+                userId: userId,
+            });
+
+            const update = await userRepository.update(userId, {
+                ...(user.name && { name: name }),
+                ...(user.email && { email: email }),
+                ...(user.profileUrl && { profileUrl: profile_url }),
+            });
+
+            return update;
+        });
+        return result;
+    }
 }

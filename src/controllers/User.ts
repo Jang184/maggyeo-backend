@@ -38,12 +38,25 @@ const getUser = async (event, context) => {
 
 const createUser = async (event, context) => {
     const services = context["services"];
-    const { name, email, data } = event.body;
+    const { name, email, profile_url } = event.body;
 
-    await services.userService.createUser(name, email);
+    await services.userService.createUser(name, email, profile_url);
 
     return {
         statusCode: 201,
+        body: "",
+    };
+};
+
+const patchUser = async (event, context) => {
+    const services = context["services"];
+    const userId = event.pathParameters["userId"];
+    const { name, email, profile_url } = event.body;
+
+    await services.userService.patchUser(userId, name, email, profile_url);
+
+    return {
+        statusCode: 200,
         body: "",
     };
 };
@@ -60,4 +73,14 @@ const wrappedCreateUser = middy(createUser)
     .use(jsonBodyParser())
     .use(initMiddleware());
 
-export { wrappedGetUser as getUser, wrappedCreateUser as createUser };
+const wrappedPatchUser = middy(patchUser)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
+export {
+    wrappedGetUser as getUser,
+    wrappedCreateUser as createUser,
+    wrappedPatchUser as patchUser,
+};

@@ -28,6 +28,13 @@ functions:
                   path: user
                   method: post
 
+    patchUser:
+        handler: src/controllers/index.patchUser
+        events:
+            - http:
+                  path: user/{userId}
+                  method: patch
+
 plugins:
     - serverless-plugin-typescript
     - serverless-offline
