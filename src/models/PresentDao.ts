@@ -9,23 +9,7 @@ export default class PresentDao {
     async createPresentList(data) {
         const { name, description, presentDetail } = data;
         const result = await this.db.withTransaction(async (qr) => {
-            // const presentRepository = qr.manager.getRepository(PresentList);
-            // const presentList = new PresentList();
-            // presentList.name = name;
-            // presentList.description = description;
-            // presentList.presentDetail = presentDetail;
-
-            // const present = await presentRepository.save(presentList);
-
-            const present = qr.manager
-                .createQueryBuilder(PresentList)
-                .insert()
-                .values({
-                    name: name,
-                    descipriton: description,
-                    presentDetail: presentDetail
-                });
-            const present2 = qr.manager.insert(PresentList, data);
+            const present = qr.manager.insert(PresentList, data);
 
             return present;
         });

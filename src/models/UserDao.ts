@@ -7,15 +7,8 @@ export default class UserDao {
     }
 
     async createUser(data) {
-        const { name, email, profile_url } = data;
         const result = await this.db.withTransaction(async (qr) => {
-            const userRepository = qr.manager.getRepository(User);
-            const user = new User();
-            user.name = name;
-            user.email = email;
-            user.profileUrl = profile_url;
-
-            await userRepository.save(user);
+            const user = qr.manager.insert(User, data);
 
             return user;
         });
@@ -31,7 +24,7 @@ export default class UserDao {
                     "user.id",
                     "user.name",
                     "user.email",
-                    "user.profile_url"
+                    "user.profileUrl"
                 ])
                 .where("user.id = :id", { id: userId })
                 .getOne();
@@ -49,13 +42,9 @@ export default class UserDao {
             // [{id:1, name:test, description:test, createdAt:...}]
             const userList: PresentList = await connection
                 .createQueryBuilder(PresentList, "list")
-                .select(["list.id", "detail.id", "part.id"])
-                .leftJoin(
-                    "list.presentDetail",
-                    "detail",
-                    "list.id = detail.list_id"
-                )
-                .leftJoin(Participate, "part", "detail.id = part.detail_id")
+                // .select(["list.id", "detail.id", "part.id"])
+                .leftJoinAndSelect("list.presentDetail", "detail")
+
                 .where("list.user_id = :id", { id: userId })
                 .getMany();
 
