@@ -1,5 +1,3 @@
-import { Repository, Connection, EntityManager, QueryRunner } from "typeorm";
-
 import { Participate, PresentList, PresentDetail, User } from "../entities";
 import { Database } from "../config/database";
 
@@ -8,12 +6,14 @@ export default class UserDao {
         this.db = db;
     }
 
-    async createUser(name: string, email: string) {
+    async createUser(data) {
+        const { name, email, profile_url } = data;
         const result = await this.db.withTransaction(async (qr) => {
             const userRepository = qr.manager.getRepository(User);
             const user = new User();
             user.name = name;
             user.email = email;
+            user.profileUrl = profile_url;
 
             await userRepository.save(user);
 
@@ -22,7 +22,7 @@ export default class UserDao {
         return result;
     }
 
-    async getUser(userId: number) {
+    async getUserInfo(userId: number) {
         const result = await this.db.query(async (connection) => {
             // {id:2, name:Juri}
             const user: User = await connection
@@ -31,7 +31,7 @@ export default class UserDao {
                     "user.id",
                     "user.name",
                     "user.email",
-                    "user.profile_url",
+                    "user.profile_url"
                 ])
                 .where("user.id = :id", { id: userId })
                 .getOne();
@@ -65,11 +65,14 @@ export default class UserDao {
     }
 
     // List user participated
+    // output ::
     async getUserParticipate(userId: number) {
         const result = await this.db.query(async (connection) => {
             const userParticipate = await connection
                 .createQueryBuilder(Participate, "part")
-                .leftJoinAndSelect("part.presentDetail", "presentDetail")
+                .select(["part.id", "detail.id", "list.id"])
+                .leftJoin("part.presentDetail", "detail")
+                .leftJoin("detail.presentList", "list")
                 .where("part.user_id = :id", { id: userId })
                 .getMany();
             return userParticipate;
@@ -83,12 +86,8 @@ export default class UserDao {
         const result = await this.db.query(async (connection) => {
             const message = await connection
                 .createQueryBuilder(Participate, "part")
-                .leftJoinAndSelect(
-                    PresentDetail,
-                    "detail",
-                    "part.detail_id = detail.id"
-                )
-                .leftJoin(PresentList, "list", "detail.list_id = list.id")
+                .leftJoinAndSelect("part.presentDetail", "detail")
+                .leftJoinAndSelect("detail.presentList", "list")
                 .where("list.user_id = :id", { id: userId })
                 .getMany();
             return message;
@@ -96,24 +95,9 @@ export default class UserDao {
         return result;
     }
 
-    async patchUser(
-        userId: number,
-        name?: string,
-        email?: string,
-        profile_url?: string
-    ) {
+    async patchUser(userId, data) {
         const result = await this.db.withTransaction(async (qr) => {
-            const userRepository = qr.manager.getRepository(User);
-
-            const user: User = await userRepository.findOne({
-                userId: userId,
-            });
-
-            const update = await userRepository.update(userId, {
-                ...(user.name && { name: name }),
-                ...(user.email && { email: email }),
-                ...(user.profileUrl && { profileUrl: profile_url }),
-            });
+            const update = await qr.manager.update(User, userId, data);
 
             return update;
         });

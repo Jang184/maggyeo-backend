@@ -14,11 +14,32 @@ provider:
         TARGET_ENV: ${self:provider.stage}
 
 functions:
-    getUser:
-        handler: src/controllers/index.getUser
+    getUserInfo:
+        handler: src/controllers/index.getUserInfo
         events:
             - http:
                   path: user/{userId}
+                  method: get
+
+    getUserList:
+        handler: src/controllers/index.getUserList
+        events:
+            - http:
+                  path: user/{userId}/list
+                  method: get
+
+    getUserParticipate:
+        handler: src/controllers/index.getUserParticipate
+        events:
+            - http:
+                  path: user/{userId}/participate
+                  method: get
+
+    getUserReceivedMessage:
+        handler: src/controllers/index.getUserReceivedMessage
+        events:
+            - http:
+                  path: user/{userId}/message
                   method: get
 
     createUser:
@@ -35,6 +56,37 @@ functions:
                   path: user/{userId}
                   method: patch
 
+    getPresentList:
+        handler: src/controllers/index.getPresentList
+        events:
+            - http:
+                  path: list/{listId}
+                  method: get
+
+    getPresentLists:
+        handler: src/controllers/index.getPresentLists
+        events:
+            - http:
+                  path: list
+                  method: get
+    patchPresentList:
+        handler: src/controllers/index.patchPresentList
+        events:
+            - http:
+                  path: list/{listId}
+                  method: patch
+    createPresentList:
+        handler: src/controllers/index.createPresentList
+        events:
+            - http:
+                  path: list
+                  method: post
+    deletePresentList:
+        handler: src/controllers/index.deletePresentList
+        events:
+            - http:
+                  path: list/{listId}
+                  method: delete
 plugins:
     - serverless-plugin-typescript
     - serverless-offline

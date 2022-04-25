@@ -2,13 +2,11 @@ import middy from "middy";
 import {
     doNotWaitForEmptyEventLoop,
     httpHeaderNormalizer,
-    jsonBodyParser,
+    jsonBodyParser
 } from "middy/middlewares";
 import { initMiddleware } from "../utils/middlewares";
-
-import { Database } from "../config/database";
-import { User, PresentList } from "../entities";
-import { UserDao } from "../models";
+import { User } from "../entities";
+import { APIGatewayEvent, Context } from "aws-lambda";
 
 /**
  * @api {get}   /user/:userId   Get User
@@ -24,44 +22,101 @@ import { UserDao } from "../models";
  * @apiSuccess (200 OK) {String}    profileUrl  user's url of profile image
  *
  */
-const getUser = async (event, context) => {
+const getUserInfo = async (event: APIGatewayEvent, context: Context) => {
     const userId = event.pathParameters["userId"];
     const services = context["services"];
 
-    const user: User = await services.userService.getUser(userId);
+    const user: User = await services.userService.getUserInfo(userId);
 
     return {
         statusCode: 200,
-        body: JSON.stringify(user),
+        body: JSON.stringify(user)
     };
 };
 
-const createUser = async (event, context) => {
+const getUserList = async (event: APIGatewayEvent, context: Context) => {
+    const userId = event.pathParameters["userId"];
     const services = context["services"];
-    const { name, email, profile_url } = event.body;
 
-    await services.userService.createUser(name, email, profile_url);
+    const user: User = await services.userService.getUserList(userId);
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify(user)
+    };
+};
+
+const getUserParticipate = async (event: APIGatewayEvent, context: Context) => {
+    const userId = event.pathParameters["userId"];
+    const services = context["services"];
+
+    const user: User = await services.userService.getUserParticipate(userId);
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify(user)
+    };
+};
+
+const getUserReceivedMessage = async (
+    event: APIGatewayEvent,
+    context: Context
+) => {
+    const userId = event.pathParameters["userId"];
+    const services = context["services"];
+
+    const user: User = await services.userService.getUserReceivedMessage(
+        userId
+    );
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify(user)
+    };
+};
+
+const createUser = async (event: APIGatewayEvent, context: Context) => {
+    const services = context["services"];
+
+    await services.userService.createUser(event.body);
 
     return {
         statusCode: 201,
-        body: "",
+        body: ""
     };
 };
 
-const patchUser = async (event, context) => {
+const patchUser = async (event: APIGatewayEvent, context: Context) => {
     const services = context["services"];
     const userId = event.pathParameters["userId"];
-    const { name, email, profile_url } = event.body;
 
-    await services.userService.patchUser(userId, name, email, profile_url);
+    await services.userService.patchUser(userId, event.body);
 
     return {
         statusCode: 200,
-        body: "",
+        body: ""
     };
 };
 
-const wrappedGetUser = middy(getUser)
+const wrappedGetUserInfo = middy(getUserInfo)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
+const wrappedGetUserList = middy(getUserList)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
+const wrappedGetUserParticipate = middy(getUserParticipate)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
+const wrappedGetUserReceivedMessage = middy(getUserReceivedMessage)
     .use(httpHeaderNormalizer())
     .use(doNotWaitForEmptyEventLoop())
     .use(jsonBodyParser())
@@ -80,7 +135,10 @@ const wrappedPatchUser = middy(patchUser)
     .use(initMiddleware());
 
 export {
-    wrappedGetUser as getUser,
+    wrappedGetUserInfo as getUserInfo,
+    wrappedGetUserList as getUserList,
+    wrappedGetUserParticipate as getUserParticipate,
+    wrappedGetUserReceivedMessage as getUserReceivedMessage,
     wrappedCreateUser as createUser,
-    wrappedPatchUser as patchUser,
+    wrappedPatchUser as patchUser
 };

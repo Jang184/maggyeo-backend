@@ -1,30 +1,39 @@
 import { UserDao } from "../models";
 
+export interface createUserInput {
+    name: string;
+    email: string;
+    profileUrl: string;
+}
+
+export interface patchUserInput {
+    name?: string;
+    email?: string;
+    profileUrl?: string;
+}
+
 export class UserService {
     userDao: UserDao;
 
     constructor(userDao: UserDao) {
         this.userDao = userDao;
     }
-    createUser(name: string, email: string, profile_url: string) {
-        return this.userDao.createUser(name, email);
+    createUser(data: createUserInput) {
+        return this.userDao.createUser(data);
     }
-    getUser(userId: number) {
-        const user = this.userDao.getUserReceivedMessage(userId);
-        // const user = {
-        //     userInfo: this.userDao.getUser(userId),
-        //     userList: this.userDao.getUserList(userId),
-        //     userParticipate: this.userDao.getUserParticipate(userId),
-        //     userReceivedMessage: this.userDao.getUserReceivedMessage(userId),
-        // };
-        return user;
+    getUserInfo(userId: number) {
+        return this.userDao.getUserInfo(userId);
     }
-    patchUser(
-        userId: number,
-        name?: string,
-        email?: string,
-        profile_url?: string
-    ) {
-        return this.userDao.patchUser(userId, name, email, profile_url);
+    getUserList(userId: number) {
+        return this.userDao.getUserList(userId);
+    }
+    getUserParticipate(userId: number) {
+        return this.userDao.getUserParticipate(userId);
+    }
+    getUserReceivedMessage(userId: number) {
+        return this.userDao.getUserReceivedMessage(userId);
+    }
+    patchUser(userId: number, data: patchUserInput) {
+        return this.userDao.patchUser(userId, data);
     }
 }
