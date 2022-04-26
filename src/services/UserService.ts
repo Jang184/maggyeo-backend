@@ -1,14 +1,24 @@
+import jwt from "jsonwebtoken";
+import axios from "axios";
+import bcrypt from "bcrypt";
 import { UserDao } from "../models";
 
-export interface createUserInput {
-    name: string;
+interface signInInput {
     email: string;
-    profileUrl: string;
+    password: string;
 }
 
-export interface patchUserInput {
+interface createUserInput {
+    name: string;
+    email: string;
+    password: string;
+    profileUrl?: string;
+}
+
+interface patchUserInput {
     name?: string;
     email?: string;
+    password?: string;
     profileUrl?: string;
 }
 
@@ -18,8 +28,38 @@ export class UserService {
     constructor(userDao: UserDao) {
         this.userDao = userDao;
     }
-    createUser(data: createUserInput) {
-        return this.userDao.createUser(data);
+    async signUp(data: createUserInput){
+        const salt = process.env.AUTH_TOKEN_SALT;
+        const hashedPassword = await bcrypt.hash(data.password, salt)
+        const userInfo = Object.assign({password: hashedPassword}, data)
+        
+        return this.userDao.createUser(userInfo)
+    }
+    async signIn(data: signInInput){
+        const { email, password } = data;
+        
+        const user = await this.userDao.getUserByEmail(email);
+        const isValid = await bcrypt.compare(password, user.password)
+
+        if (!isValid) throw new Error ('INVALID PASSWORD')
+
+        return this.generateToken(user.id)
+    }
+    async signInWithGoogle(token: string){
+        try {
+            const { data } = await axios.post(
+                `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
+            );
+            const user = await this.userDao.createUser({
+                name: data.name,
+                email: data.email,
+                profileUrl: data.picture
+            });
+
+            return this.generateToken(user.id);
+        } catch (err) {
+            throw new Error('INVALID_TOKEN')
+        }
     }
     getUserInfo(userId: number) {
         return this.userDao.getUserInfo(userId);
@@ -35,5 +75,8 @@ export class UserService {
     }
     patchUser(userId: number, data: patchUserInput) {
         return this.userDao.patchUser(userId, data);
+    }
+    generateToken(userId: number) {
+        return jwt.sign({ userId }, process.env.AUTH_TOKEN_SALT, {expiresIn: '7d'});
     }
 }

@@ -4,4 +4,10 @@
 
 - TypeScript
 - TypeORM
-- Serverless
+- Serverless framework
+
+## Cloud architecture
+
+- VPC
+
+##

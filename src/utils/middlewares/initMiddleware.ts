@@ -7,7 +7,6 @@ const initMiddleware = () => {
         before: async (handler: HandlerLambda) => {
             const connection = await getConnection();
             const db = new Database(connection);
-            console.log("start init");
             const services = getServices(db);
             handler.context["services"] = services;
             return;

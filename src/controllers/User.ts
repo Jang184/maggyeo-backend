@@ -8,6 +8,48 @@ import { initMiddleware } from "../utils/middlewares";
 import { User } from "../entities";
 import { APIGatewayEvent, Context } from "aws-lambda";
 
+const signUp = async (event, context) => {
+    const services = context["services"];
+
+    const user = await services.UserService.signUp(event.body);
+
+    return {
+        statusCode: 201,
+        body: JSON.stringify(user)
+    }
+}
+
+const signIn = async (event, context) => {
+    const services = context["services"];
+
+    const token = await services.UserService.signIn(event.body);
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            message: "login success",
+            token
+        })
+    }
+}
+
+const signInWithGoogle = async (event, context) => {
+    const services = context["services"];
+    const authorization = event.headers.Authorization;
+
+    if (!authorization) throw new Error ('No_Token')
+
+    const token = await services.UserService.signInWithGoogle(authorization);
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            message: "login successs",
+            token
+        })
+    }
+}
+
 /**
  * @api {get}   /user/:userId   Get User
  * @apiName GetUserInfo
@@ -123,6 +165,12 @@ const patchUser = async (event: APIGatewayEvent, context: Context) => {
     };
 };
 
+const wrappedSignUp = middy(signUp)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
 const wrappedGetUserInfo = middy(getUserInfo)
     .use(httpHeaderNormalizer())
     .use(doNotWaitForEmptyEventLoop())
@@ -160,6 +208,7 @@ const wrappedPatchUser = middy(patchUser)
     .use(initMiddleware());
 
 export {
+    wrappedSignUp as signUp,
     wrappedGetUserInfo as getUserInfo,
     wrappedGetUserList as getUserList,
     wrappedGetUserParticipate as getUserParticipate,
