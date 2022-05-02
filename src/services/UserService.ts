@@ -28,28 +28,37 @@ export class UserService {
     constructor(userDao: UserDao) {
         this.userDao = userDao;
     }
-    async signUp(data: createUserInput){
-        const salt = process.env.AUTH_TOKEN_SALT;
-        const hashedPassword = await bcrypt.hash(data.password, salt)
-        const userInfo = Object.assign({password: hashedPassword}, data)
-        
-        return this.userDao.createUser(userInfo)
+    async signUp(data: createUserInput) {
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(data.password, salt);
+        const userInfo = Object.assign(data, { password: hashedPassword });
+
+        const userExist = await this.userDao.getUserByEmail(data.email);
+
+        if (userExist) throw new Error("EMAIL ADDRESS EXISTS");
+
+        return this.userDao.createUser(userInfo);
     }
-    async signIn(data: signInInput){
+    async signIn(data: signInInput) {
         const { email, password } = data;
-        
+
         const user = await this.userDao.getUserByEmail(email);
-        const isValid = await bcrypt.compare(password, user.password)
+        const isValid = await bcrypt.compare(password, user.password);
 
-        if (!isValid) throw new Error ('INVALID PASSWORD')
+        if (!isValid) throw new Error("INVALID PASSWORD");
 
-        return this.generateToken(user.id)
+        return this.generateToken(user.id);
     }
-    async signInWithGoogle(token: string){
+    async signInWithGoogle(token: string) {
         try {
             const { data } = await axios.post(
                 `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`
             );
+            const userExist = await this.userDao.getUserByEmail(data.email);
+
+            if (userExist) throw new Error("EMAIL ADDRESS EXISTS");
+
             const user = await this.userDao.createUser({
                 name: data.name,
                 email: data.email,
@@ -58,7 +67,7 @@ export class UserService {
 
             return this.generateToken(user.id);
         } catch (err) {
-            throw new Error('INVALID_TOKEN')
+            throw new Error("INVALID_TOKEN");
         }
     }
     getUserInfo(userId: number) {
@@ -77,6 +86,8 @@ export class UserService {
         return this.userDao.patchUser(userId, data);
     }
     generateToken(userId: number) {
-        return jwt.sign({ userId }, process.env.AUTH_TOKEN_SALT, {expiresIn: '7d'});
+        return jwt.sign({ userId }, process.env.AUTH_TOKEN_SALT, {
+            expiresIn: "7d"
+        });
     }
 }

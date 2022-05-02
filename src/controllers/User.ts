@@ -11,18 +11,20 @@ import { APIGatewayEvent, Context } from "aws-lambda";
 const signUp = async (event, context) => {
     const services = context["services"];
 
-    const user = await services.UserService.signUp(event.body);
+    await services.userService.signUp(event.body);
 
     return {
         statusCode: 201,
-        body: JSON.stringify(user)
-    }
-}
+        body: JSON.stringify({
+            message: "signup success"
+        })
+    };
+};
 
 const signIn = async (event, context) => {
     const services = context["services"];
 
-    const token = await services.UserService.signIn(event.body);
+    const token = await services.userService.signIn(event.body);
 
     return {
         statusCode: 200,
@@ -30,16 +32,16 @@ const signIn = async (event, context) => {
             message: "login success",
             token
         })
-    }
-}
+    };
+};
 
 const signInWithGoogle = async (event, context) => {
     const services = context["services"];
     const authorization = event.headers.Authorization;
 
-    if (!authorization) throw new Error ('No_Token')
+    if (!authorization) throw new Error("No_Token");
 
-    const token = await services.UserService.signInWithGoogle(authorization);
+    const token = await services.userService.signInWithGoogle(authorization);
 
     return {
         statusCode: 200,
@@ -47,8 +49,8 @@ const signInWithGoogle = async (event, context) => {
             message: "login successs",
             token
         })
-    }
-}
+    };
+};
 
 /**
  * @api {get}   /user/:userId   Get User
@@ -66,8 +68,9 @@ const signInWithGoogle = async (event, context) => {
  *
  */
 const getUserInfo = async (event: APIGatewayEvent, context: Context) => {
-    const userId = event.pathParameters["userId"];
+    // const userId = event.pathParameters["userId"];
     const services = context["services"];
+    console.log(context);
 
     const user: User = await services.userService.getUserInfo(userId);
 
@@ -171,6 +174,12 @@ const wrappedSignUp = middy(signUp)
     .use(jsonBodyParser())
     .use(initMiddleware());
 
+const wrappedSignIn = middy(signIn)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
 const wrappedGetUserInfo = middy(getUserInfo)
     .use(httpHeaderNormalizer())
     .use(doNotWaitForEmptyEventLoop())
@@ -209,6 +218,7 @@ const wrappedPatchUser = middy(patchUser)
 
 export {
     wrappedSignUp as signUp,
+    wrappedSignIn as signIn,
     wrappedGetUserInfo as getUserInfo,
     wrappedGetUserList as getUserList,
     wrappedGetUserParticipate as getUserParticipate,

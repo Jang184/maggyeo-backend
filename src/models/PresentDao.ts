@@ -7,7 +7,6 @@ export default class PresentDao {
     }
 
     async createPresentList(data) {
-        const { name, description, presentDetail } = data;
         const result = await this.db.withTransaction(async (qr) => {
             const present = qr.manager.insert(PresentList, data);
 

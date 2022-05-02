@@ -1,7 +1,4 @@
-import jwt from "jsonwebtoken"
-import bcrypt from "bcrypt"
-
-import { Participate, PresentList, PresentDetail, User } from "../entities";
+import { Participate, PresentList, User } from "../entities";
 import { Database } from "../config/database";
 
 export default class UserDao {
@@ -12,7 +9,6 @@ export default class UserDao {
     async createUser(data) {
         const result = await this.db.withTransaction(async (qr) => {
             const user = qr.manager.insert(User, data);
-            const user2 = qr.manager.upsert(User,[data],["email"])
 
             return user;
         });
@@ -21,15 +17,11 @@ export default class UserDao {
     async getUserByEmail(email) {
         const result = await this.db.query(async (connection) => {
             const user = await connection
-                .createQueryBuilder(User)
-                .where("email = :email", { email:email })
+                .createQueryBuilder(User, "user")
+                .where("email = :email", { email: email })
                 .getOne();
-            
-            if (user == null ) {
-                throw new Error(`User email ${email} does not exist.`);
-            }
             return user;
-        })
+        });
         return result;
     }
 

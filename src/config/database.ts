@@ -5,7 +5,7 @@ import {
     createConnection,
     getConnectionManager,
     QueryRunner,
-    EntityManager,
+    EntityManager
 } from "typeorm";
 
 import { SnakeNamingStrategy } from "typeorm-naming-strategies";
@@ -31,7 +31,7 @@ const setEnvOptions = () => {
         synchronize: true,
         entities: entities,
         // subscribers : subscribers,
-        namingStrategy: new SnakeNamingStrategy(),
+        namingStrategy: new SnakeNamingStrategy()
     };
 
     return connectionOption;
@@ -75,10 +75,12 @@ export class Database {
         try {
             const result = await action(queryRunner);
             await queryRunner.commitTransaction();
+            console.log("commit");
 
             return result;
         } catch (err) {
             await queryRunner.rollbackTransaction();
+            console.log("roll back");
             throw err;
         } finally {
             await queryRunner.release();

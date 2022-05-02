@@ -2,17 +2,17 @@ service: maggyeo
 frameworkVersion: "3"
 
 custom:
-  stage: ${opt:stage, 'dev'}
+    stage: ${opt:stage, 'dev'}
 
 provider:
-  name: aws
-  runtime: nodejs14.x
-  region: ap-northeast-2
-  stage: ${opt:stage, 'dev'}
-  profile: maggyeo-backend
-  environment:
-    stage: ${self:provider.stage}
-    TARGET_ENV: ${self:provider.stage}
+    name: aws
+    runtime: nodejs14.x
+    region: ap-northeast-2
+    stage: ${opt:stage, 'dev'}
+    profile: maggyeo-backend
+    environment:
+        stage: ${self:provider.stage}
+        TARGET_ENV: ${self:provider.stage}
 #   iam:
 #     role:
 #       statements:
@@ -21,83 +21,101 @@ provider:
 #             - "s3:ListBucket"
 
 functions:
-  getUserInfo:
-    handler: src/controllers/index.getUserInfo
-    events:
-      - http:
-          path: user/{userId}
-          method: get
+    auth:
+        handler: src/utils/authorizer.authorizer
 
-  getUserList:
-    handler: src/controllers/index.getUserList
-    events:
-      - http:
-          path: user/{userId}/list
-          method: get
+    signUp:
+        handler: src/controllers/index.signUp
+        events:
+            - http:
+                  path: signup
+                  method: post
 
-  getUserParticipate:
-    handler: src/controllers/index.getUserParticipate
-    events:
-      - http:
-          path: user/{userId}/participate
-          method: get
+    signIn:
+        handler: src/controllers/index.signIn
+        events:
+            - http:
+                  path: login
+                  method: post
 
-  getUserReceivedMessage:
-    handler: src/controllers/index.getUserReceivedMessage
-    events:
-      - http:
-          path: user/{userId}/message
-          method: get
+    getUserInfo:
+        handler: src/controllers/index.getUserInfo
+        events:
+            - http:
+                  path: user
+                  method: get
+                  authorizer: auth
 
-  createUser:
-    handler: src/controllers/index.createUser
-    events:
-      - http:
-          path: user
-          method: post
+    getUserList:
+        handler: src/controllers/index.getUserList
+        events:
+            - http:
+                  path: user/list
+                  method: get
 
-  patchUser:
-    handler: src/controllers/index.patchUser
-    events:
-      - http:
-          path: user/{userId}
-          method: patch
+    getUserParticipate:
+        handler: src/controllers/index.getUserParticipate
+        events:
+            - http:
+                  path: user/participate
+                  method: get
 
-  getPresentList:
-    handler: src/controllers/index.getPresentList
-    events:
-      - http:
-          path: list/{listId}
-          method: get
+    getUserReceivedMessage:
+        handler: src/controllers/index.getUserReceivedMessage
+        events:
+            - http:
+                  path: user/message
+                  method: get
 
-  getPresentLists:
-    handler: src/controllers/index.getPresentLists
-    events:
-      - http:
-          path: list
-          method: get
-  patchPresentList:
-    handler: src/controllers/index.patchPresentList
-    events:
-      - http:
-          path: list/{listId}
-          method: patch
-  createPresentList:
-    handler: src/controllers/index.createPresentList
-    events:
-      - http:
-          path: list
-          method: post
-  deletePresentList:
-    handler: src/controllers/index.deletePresentList
-    events:
-      - http:
-          path: list/{listId}
-          method: delete
-resources:
-  Resources:
-    type: S3::Bucket
+    createUser:
+        handler: src/controllers/index.createUser
+        events:
+            - http:
+                  path: user
+                  method: post
+
+    patchUser:
+        handler: src/controllers/index.patchUser
+        events:
+            - http:
+                  path: user
+                  method: patch
+
+    getPresentList:
+        handler: src/controllers/index.getPresentList
+        events:
+            - http:
+                  path: list/{listId}
+                  method: get
+
+    getPresentLists:
+        handler: src/controllers/index.getPresentLists
+        events:
+            - http:
+                  path: list
+                  method: get
+    patchPresentList:
+        handler: src/controllers/index.patchPresentList
+        events:
+            - http:
+                  path: list/{listId}
+                  method: patch
+    createPresentList:
+        handler: src/controllers/index.createPresentList
+        events:
+            - http:
+                  path: list
+                  method: post
+    deletePresentList:
+        handler: src/controllers/index.deletePresentList
+        events:
+            - http:
+                  path: list/{listId}
+                  method: delete
+# resources:
+#   Resources:
+#     type: S3::Bucket
 plugins:
-  - serverless-plugin-typescript
-  - serverless-offline
-  - serverless-dotenv-plugin
+    - serverless-plugin-typescript
+    - serverless-offline
+    - serverless-dotenv-plugin
