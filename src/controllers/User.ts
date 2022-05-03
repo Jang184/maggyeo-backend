@@ -7,7 +7,32 @@ import {
 import { initMiddleware } from "../utils/middlewares";
 import { User } from "../entities";
 import { APIGatewayEvent, Context } from "aws-lambda";
+import { PrivateAPIGatewayEvent } from "../common/types";
 
+/**
+ * @api {post}  /signin     Sign Up
+ * @apiName SignUp
+ * @apiGroup User
+ *
+ * @apiParam (Body) {String}    name        user's name
+ * @apiParam (Body) {String}    email       user's email
+ * @apiParam (Body) {String}    password    user's password
+ * @apiParam (Body) {String}    profileUrl  user's profile image url
+ * @apiParamExample {json}  SignUpRequest
+ *      {
+ *          "name" : "testUser",
+ *          "email" : "testUser@gmail.com",
+ *          "password" : "testUser",
+ *          "profileUrl" : "testUser.com"
+ *       }
+ *
+ * @apiSuccess (200 OK) {String}    message
+ * @apiSuccessExample {json}   SignUpSuccess
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message" : "signup success"
+ *      }
+ */
 const signUp = async (event, context) => {
     const services = context["services"];
 
@@ -21,7 +46,29 @@ const signUp = async (event, context) => {
     };
 };
 
-const signIn = async (event, context) => {
+/**
+ * @api {post}  /login      Sign In
+ * @apiName SignIn
+ * @apiGroup User
+ *
+ * @apiParam (Body) {String}    email       user's email
+ * @apiParam (Body) {String}    password    user's password
+ * @apiParamExample {json}  SignInRequest
+ *      {
+ *          "email" : "testUser@gmail.com",
+ *          "password" : "testUser"
+ *       }
+ *
+ * @apiSuccess (200 OK) {String}    message
+ * @apiSuccess (200 OK) {String}    token
+ * @apiSuccessExample {json}    SignInSuccess
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message" : "login success",
+ *          "token"   : "authorizationToken"
+ *      }
+ */
+const signIn = async (event: APIGatewayEvent, context: Context) => {
     const services = context["services"];
 
     const token = await services.userService.signIn(event.body);
@@ -53,24 +100,18 @@ const signInWithGoogle = async (event, context) => {
 };
 
 /**
- * @api {get}   /user/:userId   Get User
+ * @api {get}   /user  Get User
  * @apiName GetUserInfo
  * @apiGroup User
- *
- * @apiParam (pathParam) {Number}   userId  Users pk ID
- * @apiParamExample {text}  Request
- * GET /user/418
  *
  * @apiSuccess (200 OK) {Number}    id  unique id
  * @apiSuccess (200 OK) {String}    name  user's name
  * @apiSuccess (200 OK) {String}    email user's email
  * @apiSuccess (200 OK) {String}    profileUrl  user's url of profile image
- *
  */
 const getUserInfo = async (event: APIGatewayEvent, context: Context) => {
-    // const userId = event.pathParameters["userId"];
+    const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
-    console.log(context);
 
     const user: User = await services.userService.getUserInfo(userId);
 
@@ -80,7 +121,7 @@ const getUserInfo = async (event: APIGatewayEvent, context: Context) => {
     };
 };
 /**
- * @api {get}   /user/:userId/list  Get User's List
+ * @api {get}   /user/list  Get User's List
  * @apiName GetUserList
  * @apiGroup User
  *
@@ -105,7 +146,7 @@ const getUserInfo = async (event: APIGatewayEvent, context: Context) => {
 
  */
 const getUserList = async (event: APIGatewayEvent, context: Context) => {
-    const userId = event.pathParameters["userId"];
+    const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
 
     const user: User = await services.userService.getUserList(userId);
@@ -117,7 +158,7 @@ const getUserList = async (event: APIGatewayEvent, context: Context) => {
 };
 
 const getUserParticipate = async (event: APIGatewayEvent, context: Context) => {
-    const userId = event.pathParameters["userId"];
+    const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
 
     const user: User = await services.userService.getUserParticipate(userId);
@@ -132,7 +173,7 @@ const getUserReceivedMessage = async (
     event: APIGatewayEvent,
     context: Context
 ) => {
-    const userId = event.pathParameters["userId"];
+    const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
 
     const user: User = await services.userService.getUserReceivedMessage(
@@ -145,20 +186,25 @@ const getUserReceivedMessage = async (
     };
 };
 
-const createUser = async (event: APIGatewayEvent, context: Context) => {
-    const services = context["services"];
+/**
+ * @api {patch} /user   Patch User
+ * @apiName PatchUser
+ * @apiGroup User
+ *
+ * @apiParam (Body) {String}    [name]      user's name
+ * @apiParam (Body) {String}    [password]  user's password
+ * @apiParamExample {json}  PatchUserRequest
+ *      {
+ *          "name" : "testUser2",
+ *          "password" : "testUser2"
+ *      }
+ */
 
-    await services.userService.createUser(event.body);
-
-    return {
-        statusCode: 201,
-        body: ""
-    };
-};
-
+// TODO :: when client changes profile image, get presigned url of profile images
+//         client want to upload.
 const patchUser = async (event: APIGatewayEvent, context: Context) => {
+    const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
-    const userId = event.pathParameters["userId"];
 
     await services.userService.patchUser(userId, event.body);
 
@@ -204,12 +250,6 @@ const wrappedGetUserReceivedMessage = middy(getUserReceivedMessage)
     .use(jsonBodyParser())
     .use(initMiddleware());
 
-const wrappedCreateUser = middy(createUser)
-    .use(httpHeaderNormalizer())
-    .use(doNotWaitForEmptyEventLoop())
-    .use(jsonBodyParser())
-    .use(initMiddleware());
-
 const wrappedPatchUser = middy(patchUser)
     .use(httpHeaderNormalizer())
     .use(doNotWaitForEmptyEventLoop())
@@ -223,6 +263,5 @@ export {
     wrappedGetUserList as getUserList,
     wrappedGetUserParticipate as getUserParticipate,
     wrappedGetUserReceivedMessage as getUserReceivedMessage,
-    wrappedCreateUser as createUser,
     wrappedPatchUser as patchUser
 };

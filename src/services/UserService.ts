@@ -17,9 +17,7 @@ interface createUserInput {
 
 interface patchUserInput {
     name?: string;
-    email?: string;
     password?: string;
-    profileUrl?: string;
 }
 
 export class UserService {
@@ -29,9 +27,7 @@ export class UserService {
         this.userDao = userDao;
     }
     async signUp(data: createUserInput) {
-        const saltRounds = 10;
-        const salt = await bcrypt.genSalt(saltRounds);
-        const hashedPassword = await bcrypt.hash(data.password, salt);
+        const hashedPassword = await this.generateHashedPassword(data.password);
         const userInfo = Object.assign(data, { password: hashedPassword });
 
         const userExist = await this.userDao.getUserByEmail(data.email);
@@ -82,12 +78,26 @@ export class UserService {
     getUserReceivedMessage(userId: number) {
         return this.userDao.getUserReceivedMessage(userId);
     }
-    patchUser(userId: number, data: patchUserInput) {
+    async patchUser(userId: number, data: patchUserInput) {
+        if (data.password) {
+            const hashedPassword = await this.generateHashedPassword(
+                data.password
+            );
+            data.password = hashedPassword;
+        }
+
         return this.userDao.patchUser(userId, data);
     }
     generateToken(userId: number) {
         return jwt.sign({ userId }, process.env.AUTH_TOKEN_SALT, {
             expiresIn: "7d"
         });
+    }
+    async generateHashedPassword(password: string) {
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        return hashedPassword;
     }
 }

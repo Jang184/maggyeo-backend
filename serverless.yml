@@ -22,7 +22,7 @@ provider:
 
 functions:
     auth:
-        handler: src/utils/authorizer.authorizer
+        handler: src/utils/authorizer.handler
 
     signUp:
         handler: src/controllers/index.signUp
@@ -44,7 +44,10 @@ functions:
             - http:
                   path: user
                   method: get
-                  authorizer: auth
+                  authorizer:
+                      name: auth
+                      type: token
+                      #   identitySource: method.request.header.Authorization
 
     getUserList:
         handler: src/controllers/index.getUserList
@@ -52,6 +55,7 @@ functions:
             - http:
                   path: user/list
                   method: get
+                  authorizer: auth
 
     getUserParticipate:
         handler: src/controllers/index.getUserParticipate
@@ -59,6 +63,7 @@ functions:
             - http:
                   path: user/participate
                   method: get
+                  authorizer: auth
 
     getUserReceivedMessage:
         handler: src/controllers/index.getUserReceivedMessage
@@ -66,13 +71,18 @@ functions:
             - http:
                   path: user/message
                   method: get
+                  integration: lambda
+                  request:
+                      template:
+                          application/json: '{"userId":"$context.authorizer.principalId"}'
+                  authorizer: auth
 
-    createUser:
-        handler: src/controllers/index.createUser
-        events:
-            - http:
-                  path: user
-                  method: post
+    # createUser:
+    #     handler: src/controllers/index.createUser
+    #     events:
+    #         - http:
+    #               path: user
+    #               method: post
 
     patchUser:
         handler: src/controllers/index.patchUser
@@ -80,6 +90,7 @@ functions:
             - http:
                   path: user
                   method: patch
+                  authorizer: auth
 
     getPresentList:
         handler: src/controllers/index.getPresentList
@@ -94,27 +105,53 @@ functions:
             - http:
                   path: list
                   method: get
+
     patchPresentList:
         handler: src/controllers/index.patchPresentList
         events:
             - http:
                   path: list/{listId}
                   method: patch
+                  authorizer: auth
+
     createPresentList:
         handler: src/controllers/index.createPresentList
         events:
             - http:
                   path: list
                   method: post
+                  authorizer: auth
+
     deletePresentList:
         handler: src/controllers/index.deletePresentList
         events:
             - http:
                   path: list/{listId}
                   method: delete
+                  authorizer: auth
 # resources:
-#   Resources:
-#     type: S3::Bucket
+#     Resources:
+# This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+#         GatewayResponse:
+#             Type: "AWS::ApiGateway::GatewayResponse"
+#             Properties:
+#                 ResponseParameters:
+#                     gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+#                     gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+#                 ResponseType: EXPIRED_TOKEN
+#                 RestApiId:
+#                     Ref: "ApiGatewayRestApi"
+#                 StatusCode: "401"
+#         AuthFailureGatewayResponse:
+#             Type: "AWS::ApiGateway::GatewayResponse"
+#             Properties:
+#                 ResponseParameters:
+#                     gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+#                     gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+#                 ResponseType: UNAUTHORIZED
+#                 RestApiId:
+#                     Ref: "ApiGatewayRestApi"
+#                 StatusCode: "401"
 plugins:
     - serverless-plugin-typescript
     - serverless-offline

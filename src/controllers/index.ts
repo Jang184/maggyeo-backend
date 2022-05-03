@@ -5,7 +5,6 @@ import {
     getUserList,
     getUserParticipate,
     getUserReceivedMessage,
-    createUser,
     patchUser
 } from "./User";
 
@@ -24,7 +23,6 @@ export {
     getUserList,
     getUserParticipate,
     getUserReceivedMessage,
-    createUser,
     patchUser,
     getPresentList,
     getPresentLists,
