@@ -63,15 +63,13 @@ export default class UserDao {
         return result;
     }
 
-    // List user participated
-    // output ::
     async getUserParticipate(userId: number) {
         const result = await this.db.query(async (connection) => {
             const userParticipate = await connection
                 .createQueryBuilder(Participate, "part")
-                .select(["part.id", "detail.id", "list.id"])
-                .leftJoin("part.presentDetail", "detail")
-                .leftJoin("detail.presentList", "list")
+                .select()
+                .leftJoinAndSelect("part.presentDetail", "detail")
+                .leftJoinAndSelect("detail.presentList", "list")
                 .where("part.user_id = :id", { id: userId })
                 .getMany();
             return userParticipate;
@@ -85,8 +83,9 @@ export default class UserDao {
         const result = await this.db.query(async (connection) => {
             const message = await connection
                 .createQueryBuilder(Participate, "part")
-                .leftJoinAndSelect("part.presentDetail", "detail")
-                .leftJoinAndSelect("detail.presentList", "list")
+                .select("part")
+                .leftJoin("part.presentDetail", "detail")
+                .leftJoin("detail.presentList", "list")
                 .where("list.user_id = :id", { id: userId })
                 .getMany();
             return message;

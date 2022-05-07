@@ -71,18 +71,7 @@ functions:
             - http:
                   path: user/message
                   method: get
-                  integration: lambda
-                  request:
-                      template:
-                          application/json: '{"userId":"$context.authorizer.principalId"}'
                   authorizer: auth
-
-    # createUser:
-    #     handler: src/controllers/index.createUser
-    #     events:
-    #         - http:
-    #               path: user
-    #               method: post
 
     patchUser:
         handler: src/controllers/index.patchUser

@@ -3,34 +3,25 @@ import { PresentDao } from "../models";
 interface createPresentListInput {
     name: string;
     description: string;
-    userId: number;
     presentDetail: [
         {
-            id: number;
             url: string;
             price: number;
             description: string;
             countLimit: number;
-            countNow: number;
-            createdAt: Date;
-            updatedAt: Date;
         }
     ];
 }
 
 interface patchPresentListInput {
-    name: string;
-    description: string;
-    presentDetail: [
+    name?: string;
+    description?: string;
+    presentDetail?: [
         {
-            id: number;
-            url: string;
-            price: number;
-            description: string;
-            countLimit: number;
-            countNow: number;
-            createdAt: Date;
-            updatedAt: Date;
+            url?: string;
+            price?: number;
+            description?: string;
+            countLimit?: number;
         }
     ];
 }
@@ -42,7 +33,7 @@ export class PresentService {
         this.presentDao = presentDao;
     }
     createPresentList(userId: number, data: createPresentListInput) {
-        return this.presentDao.createPresentList(data);
+        return this.presentDao.createPresentList(userId, data);
     }
     patchPresentList(listId: number, data: patchPresentListInput) {
         return this.presentDao.patchPresentList(listId, data);
@@ -52,5 +43,8 @@ export class PresentService {
     }
     getPresentList(listId: number) {
         return this.presentDao.getPresentList(listId);
+    }
+    getPresentLists() {
+        return this.presentDao.getPresentLists();
     }
 }

@@ -33,11 +33,25 @@ const getPresentLists = async (event: APIGatewayEvent, context: Context) => {
     };
 };
 
+/**
+ * @api {post}  /list   Create Present List
+ * @apiName CreatePresentList
+ * @apiGroup    PresentList
+ *
+ * @apiParam    (Body)  {String}    name            name of present list
+ * @apiParam    (Body)  {String}    description     description of present list
+ * @apiParam    (Body)  {Object[]}  presentDetail   detail of present List
+ * @apiParam    (Body)  {String}    presentDetail.url           url of present detail
+ * @apiParam    (Body)  {String}    presentDetail.description   description of present detail
+ * @apiParam    (Body)  {Number}    presentDetail.countLimit   count limit of present detail
+ * @apiParam    (Body)  {Number}    presentDetail.price         price of present detail
+ */
 const createPresentList = async (event: APIGatewayEvent, context: Context) => {
-    const services = context["service"];
+    const userId = event.requestContext.authorizer["userId"];
+    const services = context["services"];
 
     const presentList: PresentList =
-        await services.presentService.createPresentList(event.body);
+        await services.presentService.createPresentList(userId, event.body);
 
     return {
         statusCode: 201,
@@ -45,9 +59,24 @@ const createPresentList = async (event: APIGatewayEvent, context: Context) => {
     };
 };
 
+/**
+ * @api {patch}  /list/{listId}   Patch Present List
+ * @apiName PatchPresentList
+ * @apiGroup    PresentList
+ *
+ * @apiParam    (pathParam) {Number}    listId  list id
+ * @apiParam    (Body)  {Object}    [presentList]       present list
+ * @apiParam    (Body)  {String}    [presentList.name]  name of present list
+ * @apiParam    (Body)  {String}    [presentList.description]     description of present list
+ * @apiParam    (Body)  {Object[]}  [presentDetail]   detail of present list
+ * @apiParam    (Body)  {String}    [presentDetail.url]           url of present detail
+ * @apiParam    (Body)  {String}    [presentDetail.description]   description of present detail
+ * @apiParam    (Body)  {Number}    [presentDetail.countLimit]   count limit of present detail
+ * @apiParam    (Body)  {Number}    [presentDetail.price]         price of present detail
+ */
 const patchPresentList = async (event: APIGatewayEvent, context: Context) => {
     const listId = event.pathParameters["listId"];
-    const services = context["service"];
+    const services = context["services"];
 
     const presentList: PresentList =
         await services.presentService.patchPresentList(listId, event.body);
@@ -60,7 +89,7 @@ const patchPresentList = async (event: APIGatewayEvent, context: Context) => {
 
 const deletePresentList = async (event: APIGatewayEvent, context: Context) => {
     const listId = event.pathParameters["listId"];
-    const services = context["service"];
+    const services = context["services"];
 
     await services.presentService.deletePresentList(listId);
 

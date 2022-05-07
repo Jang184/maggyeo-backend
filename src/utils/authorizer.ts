@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 
 const generatePolicy = (principalId, methodArn) => {
     const apiGatewayWildcard = methodArn.split("/", 2).join("/") + "/*";
+    // console.log("methodArn:", methodArn);
+    // console.log("wildcard:", apiGatewayWildcard);
 
     return {
         principalId,

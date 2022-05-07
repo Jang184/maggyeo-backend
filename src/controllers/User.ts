@@ -7,7 +7,6 @@ import {
 import { initMiddleware } from "../utils/middlewares";
 import { User } from "../entities";
 import { APIGatewayEvent, Context } from "aws-lambda";
-import { PrivateAPIGatewayEvent } from "../common/types";
 
 /**
  * @api {post}  /signin     Sign Up
@@ -125,10 +124,6 @@ const getUserInfo = async (event: APIGatewayEvent, context: Context) => {
  * @apiName GetUserList
  * @apiGroup User
  *
- * @apiParam (pathParam) {Number}   userId  Users pk ID
- * @apiParamExample {text}  Request
- * GET /user/418/list
- *
  * @apiSuccess (200 OK) {Number}    id                  unique id of list
  * @apiSuccess (200 OK) {String}    name                name of list
  * @apiSuccess (200 OK) {String}    description         description of list
@@ -141,9 +136,8 @@ const getUserInfo = async (event: APIGatewayEvent, context: Context) => {
  * @apiSuccess (200 OK) {String}    presentDetail.description   description of detail
  * @apiSuccess (200 OK) {Number}    presentDetail.countLimit    count limit
  * @apiSuccess (200 OK) {Number}    presentDetail.countNow      count now
- * @apiSuccess (200 OK) {Date}      presentDetail.createdAt     created date 
+ * @apiSuccess (200 OK) {Date}      presentDetail.createdAt     created date
  * @apiSuccess (200 OK) {Date}      presentDetail.updatedAt     updated date
-
  */
 const getUserList = async (event: APIGatewayEvent, context: Context) => {
     const userId = event.requestContext.authorizer["userId"];
@@ -157,6 +151,13 @@ const getUserList = async (event: APIGatewayEvent, context: Context) => {
     };
 };
 
+/**
+ * @api {get}   /user/participate   Get User's participation
+ * @apiName GetUserParticipate
+ * @apiGroup User
+ *
+ * @apiSuccess  (200 OK)    {}
+ */
 const getUserParticipate = async (event: APIGatewayEvent, context: Context) => {
     const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
@@ -169,6 +170,16 @@ const getUserParticipate = async (event: APIGatewayEvent, context: Context) => {
     };
 };
 
+/**
+ * @api {get}   /user/message   Get Received Message
+ * @apiName GetUserMessage
+ * @apiGroup User
+ *
+ * @apiSuccess  (200 OK)    {Number}    id          id of message
+ * @apiSuccess  (200 OK)    {String}    message     received message
+ * @apiSuccess  (200 OK)    {Date}      createdAt   created date
+ * @apiSuccess  (200 OK)    {Date}      updatedAt   updated date
+ */
 const getUserReceivedMessage = async (
     event: APIGatewayEvent,
     context: Context
