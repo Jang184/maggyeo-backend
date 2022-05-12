@@ -8,6 +8,8 @@ jspm_packages
 # env
 *.env.*
 
+# build
 .build
 
+# documentation
 apidoc

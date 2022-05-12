@@ -3,13 +3,20 @@ frameworkVersion: "3"
 
 custom:
     stage: ${opt:stage, 'dev'}
+    prune:
+        automatic: true
+        number: 1
     vpc:
+        dev:
+            securityGroupIds: []
+            subnetIds: []
         prod:
             securityGroupIds:
-                - sg-0cccb6b8e75dcfb4d
+                - ${env:LAMBDA_SG}
             subnetIds:
-                - subnet-01dea442a462c5b2a
-                - subnet-0e07375409c2f56e8
+                - ${env:LAMBDA_SUBNET_ID1}
+                - ${env:LAMBDA_SUBNET_ID2}
+useDotenv: true
 
 provider:
     name: aws
@@ -19,13 +26,13 @@ provider:
     profile: maggyeo-backend
     environment:
         stage: ${self:provider.stage}
-    vpc: ${custom.vpc.${opt:stage, 'dev'}}
+    vpc: ${self:custom.vpc.${opt:stage, 'dev'}}
     # vpc:
     #     securityGroupIds:
-    #         - ${env:LAMBDA_SG}
+    #         - sg-0cccb6b8e75dcfb4d
     #     subnetIds:
-    #         - ${env:LAMBDA_SUBNET_ID1}
-    #         - ${env:LAMBDA_SUBNET_ID2}
+    #         - subnet-01dea442a462c5b2a
+    #         - subnet-0e07375409c2f56e8
 
 #   iam:
 #     role:
@@ -132,30 +139,30 @@ functions:
                   path: list/{listId}
                   method: delete
                   authorizer: auth
-# resources:
-#     Resources:
-# This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
-#         GatewayResponse:
-#             Type: "AWS::ApiGateway::GatewayResponse"
-#             Properties:
-#                 ResponseParameters:
-#                     gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-#                     gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-#                 ResponseType: EXPIRED_TOKEN
-#                 RestApiId:
-#                     Ref: "ApiGatewayRestApi"
-#                 StatusCode: "401"
-#         AuthFailureGatewayResponse:
-#             Type: "AWS::ApiGateway::GatewayResponse"
-#             Properties:
-#                 ResponseParameters:
-#                     gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-#                     gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
-#                 ResponseType: UNAUTHORIZED
-#                 RestApiId:
-#                     Ref: "ApiGatewayRestApi"
-#                 StatusCode: "401"
+resources:
+    Resources:
+        # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+        GatewayResponse:
+            Type: "AWS::ApiGateway::GatewayResponse"
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: EXPIRED_TOKEN
+                RestApiId:
+                    Ref: "ApiGatewayRestApi"
+                StatusCode: "401"
+        AuthFailureGatewayResponse:
+            Type: "AWS::ApiGateway::GatewayResponse"
+            Properties:
+                ResponseParameters:
+                    gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+                    gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+                ResponseType: UNAUTHORIZED
+                RestApiId:
+                    Ref: "ApiGatewayRestApi"
+                StatusCode: "401"
 plugins:
+    - serverless-dotenv-plugin
     - serverless-plugin-typescript
     - serverless-offline
-    - serverless-dotenv-plugin
