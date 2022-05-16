@@ -3,10 +3,10 @@ import axios from "axios";
 import bcrypt from "bcryptjs";
 import { UserDao } from "../models";
 
-interface signInInput {
+type signInInput = {
     email: string;
     password: string;
-}
+};
 
 interface createUserInput {
     name: string;

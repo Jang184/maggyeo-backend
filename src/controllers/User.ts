@@ -6,7 +6,7 @@ import {
 } from "middy/middlewares";
 import { initMiddleware } from "../utils/middlewares";
 import { User } from "../entities";
-import { APIGatewayEvent, Context } from "aws-lambda";
+import { APIGatewayEvent, Context, ProxyResult } from "aws-lambda";
 
 /**
  * @api {post}  /signin     Sign Up
@@ -32,7 +32,12 @@ import { APIGatewayEvent, Context } from "aws-lambda";
  *          "message" : "signup success"
  *      }
  */
-const signUp = async (event, context) => {
+
+//TODO: profile img processing
+const signUp = async (
+    event: APIGatewayEvent,
+    context: Context
+): Promise<ProxyResult> => {
     const services = context["services"];
 
     await services.userService.signUp(event.body);
@@ -67,7 +72,10 @@ const signUp = async (event, context) => {
  *          "token"   : "authorizationToken"
  *      }
  */
-const signIn = async (event: APIGatewayEvent, context: Context) => {
+const signIn = async (
+    event: APIGatewayEvent,
+    context: Context
+): Promise<ProxyResult> => {
     const services = context["services"];
 
     const token = await services.userService.signIn(event.body);
@@ -108,7 +116,10 @@ const signInWithGoogle = async (event, context) => {
  * @apiSuccess (200 OK) {String}    email user's email
  * @apiSuccess (200 OK) {String}    profileUrl  user's url of profile image
  */
-const getUserInfo = async (event: APIGatewayEvent, context: Context) => {
+const getUserInfo = async (
+    event: APIGatewayEvent,
+    context: Context
+): Promise<ProxyResult> => {
     const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
 

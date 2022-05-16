@@ -2,12 +2,14 @@
 
 ## Stack
 
-- TypeScript
-- TypeORM
-- Serverless framework
+-   TypeScript
+-   TypeORM
+-   Serverless framework
 
-## Cloud architecture
+## Network architecture
 
-- VPC
+-   VPC
 
 ##
+
+-   bcrypt를 사용해 암호화한 이유

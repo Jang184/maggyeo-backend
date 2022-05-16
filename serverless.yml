@@ -6,17 +6,28 @@ custom:
     prune:
         automatic: true
         number: 1
-    vpc:
+    # vpc:
+    #     dev:
+    #         securityGroupIds: []
+    #         subnetIds: []
+    #     prod:
+    #         securityGroupIds:
+    #             - ${env:LAMBDA_SG}
+    #         subnetIds:
+    #             - ${env:LAMBDA_SUBNET_ID1}
+    #             - ${env:LAMBDA_SUBNET_ID2}
+    webpackConfig:
         dev:
-            securityGroupIds: []
-            subnetIds: []
+            webpackConfig: "./webpack.dev.js"
+            includeModules: true
+            pacakger: "npm"
         prod:
-            securityGroupIds:
-                - ${env:LAMBDA_SG}
-            subnetIds:
-                - ${env:LAMBDA_SUBNET_ID1}
-                - ${env:LAMBDA_SUBNET_ID2}
-useDotenv: true
+            webpackConfig: "./webpack.prod.js"
+            includeModules:
+                forceExclude:
+                    - aws-sdk
+            packager: "npm"
+    webpack: ${self:custom.webpackConfig.${opt:stage, 'dev'}}
 
 provider:
     name: aws
@@ -26,20 +37,24 @@ provider:
     profile: maggyeo-backend
     environment:
         stage: ${self:provider.stage}
-    vpc: ${self:custom.vpc.${opt:stage, 'dev'}}
-    # vpc:
-    #     securityGroupIds:
-    #         - sg-0cccb6b8e75dcfb4d
-    #     subnetIds:
-    #         - subnet-01dea442a462c5b2a
-    #         - subnet-0e07375409c2f56e8
+    # vpc: ${self:custom.vpc.${opt:stage, 'dev'}}
+    vpc:
+        securityGroupIds:
+            - sg-0cccb6b8e75dcfb4d
+        subnetIds:
+            - subnet-01dea442a462c5b2a
+            - subnet-0e07375409c2f56e8
 
-#   iam:
-#     role:
-#       statements:
-#         - Effect: "Allow"
-#           Action:
-#             - "s3:ListBucket"
+    iamRoleStatements:
+        - Effect: "Allow"
+          Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+              - "ec2:CreateNetworkInterface"
+              - "ec2:DeleteNetworkInterface"
+              - "ec2:DescribeNetworkInterfaces"
+          Resource: "*"
 
 functions:
     auth:
@@ -163,6 +178,7 @@ resources:
                     Ref: "ApiGatewayRestApi"
                 StatusCode: "401"
 plugins:
+    - serverless-webpack
     - serverless-dotenv-plugin
     - serverless-plugin-typescript
     - serverless-offline
