@@ -56,18 +56,20 @@ export default class PresentDao {
                 .leftJoinAndSelect("list.presentDetail", "detail")
                 .where("list.id = :id", { id: listId })
                 .getOne();
+
             return presentList;
         });
         return result;
     }
 
     // TODO : pagination
-    async getPresentLists() {
+    async getPresentLists(offset, limit, order) {
         const result = await this.db.query(async (connection) => {
             const presentLists = await connection
                 .createQueryBuilder(PresentList, "list")
-                // .leftJoinAndSelect("list.presentDetail", "detail")
-                .orderBy()
+                .orderBy("list.createdAt", order)
+                .skip(offset)
+                .take(limit)
                 .getMany();
             return presentLists;
         });

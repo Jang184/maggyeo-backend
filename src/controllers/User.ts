@@ -5,7 +5,7 @@ import {
     jsonBodyParser
 } from "middy/middlewares";
 import { initMiddleware } from "../utils/middlewares";
-import { User } from "../entities";
+import { User, PresentList } from "../entities";
 import { APIGatewayEvent, Context, ProxyResult } from "aws-lambda";
 
 /**
@@ -135,6 +135,11 @@ const getUserInfo = async (
  * @apiName GetUserList
  * @apiGroup User
  *
+ * @apiParam   (QueryStringParam) {Number}  offset=0
+ * @apiParam   (QueryStringParam) {Number}  limit=5
+ * @apiParam   (QueryStringParam) {String="ASC","DESC"}  order
+ *
+ *
  * @apiSuccess (200 OK) {Number}    id                  unique id of list
  * @apiSuccess (200 OK) {String}    name                name of list
  * @apiSuccess (200 OK) {String}    description         description of list
@@ -152,13 +157,23 @@ const getUserInfo = async (
  */
 const getUserList = async (event: APIGatewayEvent, context: Context) => {
     const userId = event.requestContext.authorizer["userId"];
+    const {
+        offset = 0,
+        limit = 5,
+        order = "DESC"
+    } = event.queryStringParameters;
     const services = context["services"];
 
-    const user: User = await services.userService.getUserList(userId);
+    const userList: PresentList[] = await services.userService.getUserList(
+        userId,
+        Number(offset),
+        Number(limit),
+        order
+    );
 
     return {
         statusCode: 200,
-        body: JSON.stringify(user)
+        body: JSON.stringify(userList)
     };
 };
 
@@ -178,6 +193,21 @@ const getUserParticipate = async (event: APIGatewayEvent, context: Context) => {
     return {
         statusCode: 200,
         body: JSON.stringify(user)
+    };
+};
+
+const patchUserParticipate = async (
+    event: APIGatewayEvent,
+    context: Context
+) => {
+    const partId = event.pathParameters["partId"];
+    const services = context["services"];
+
+    await services.userService.patchUserParticipate(partId, event.body);
+
+    return {
+        statusCode: 200,
+        body: ""
     };
 };
 
@@ -278,6 +308,12 @@ const wrappedPatchUser = middy(patchUser)
     .use(jsonBodyParser())
     .use(initMiddleware());
 
+const wrappedPatchUserParticipate = middy(patchUserParticipate)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
 export {
     wrappedSignUp as signUp,
     wrappedSignIn as signIn,
@@ -285,5 +321,6 @@ export {
     wrappedGetUserList as getUserList,
     wrappedGetUserParticipate as getUserParticipate,
     wrappedGetUserReceivedMessage as getUserReceivedMessage,
-    wrappedPatchUser as patchUser
+    wrappedPatchUser as patchUser,
+    wrappedPatchUserParticipate as patchUserParticipate
 };

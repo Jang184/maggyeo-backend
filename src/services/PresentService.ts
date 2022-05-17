@@ -1,6 +1,6 @@
 import { PresentDao } from "../models";
 
-interface createPresentListInput {
+type createPresentListInput = {
     name: string;
     description: string;
     presentDetail: [
@@ -11,9 +11,9 @@ interface createPresentListInput {
             countLimit: number;
         }
     ];
-}
+};
 
-interface patchPresentListInput {
+type patchPresentListInput = {
     name?: string;
     description?: string;
     presentDetail?: [
@@ -24,7 +24,7 @@ interface patchPresentListInput {
             countLimit?: number;
         }
     ];
-}
+};
 
 export class PresentService {
     presentDao: PresentDao;
@@ -44,7 +44,7 @@ export class PresentService {
     getPresentList(listId: number) {
         return this.presentDao.getPresentList(listId);
     }
-    getPresentLists() {
-        return this.presentDao.getPresentLists();
+    getPresentLists(offset: number, limit: number, order: "ASC" | "DESC") {
+        return this.presentDao.getPresentLists(offset, limit, order);
     }
 }

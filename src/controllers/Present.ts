@@ -8,6 +8,31 @@ import { initMiddleware } from "../utils/middlewares";
 import { PresentList } from "../entities";
 import { APIGatewayEvent, Context } from "aws-lambda";
 
+/**
+ * @api {get}   /list/{listId}  Get Present List
+ * @apiName GetPresentList
+ * @apiGroup Present
+ *
+ * @apiParam (PathParam) {Number} listId    List Id
+ * @apiParamExample {text}  Request
+ *      HTTP/1.1    GET  /list/814
+ *
+ * @apiSuccess  (200 OK)  {Number}    id            unique id
+ * @apiSuccess  (200 OK)  {String}    name          name of list
+ * @apiSuccess  (200 OK)  {String}    description   description of list
+ * @apiSuccess  (200 OK)  {Date}      createdAt     created date
+ * @apiSuccess  (200 OK)  {Date}      updatedAt     updated date
+ * @apiSuccess  (200 OK)  {Object[]}  presentDetail             Present Detail
+ * @apiSuccess  (200 OK)  {Number}    presentDetail.id          id of detail
+ * @apiSuccess  (200 OK)  {String}    presentDetail.url         url of detail
+ * @apiSuccess  (200 OK)  {Number}    presentDetail.price       price of detail
+ * @apiSuccess  (200 OK)  {String}    presentDetail.description description of detail
+ * @apiSuccess  (200 OK)  {Number}    presentDetail.countLimit  count limit of detail
+ * @apiSuccess  (200 OK)  {Number}    presentDetail.contNow     count now of detail
+ * @apiSuccess  (200 OK)  {Date}      presentDetail.createdAt   created date
+ * @apiSuccess  (200 OK)  {Date}      presentDetail.updatedAt   updated date
+ *
+ */
 const getPresentList = async (event: APIGatewayEvent, context: Context) => {
     const listId = event.pathParameters["listId"];
     const services = context["services"];
@@ -21,11 +46,38 @@ const getPresentList = async (event: APIGatewayEvent, context: Context) => {
     };
 };
 
+/**
+ * @api {get}   /list   Get All Present List
+ * @apiName GetAllPresentList
+ * @apiGroup Present
+ *
+ * @apiParam  (QueryStringParam)    {Number}    offset
+ * @apiParam  (QueryStringParam)    {Number}    limit
+ * @apiParam  (QueryStringParam)    {String="DESC","ASC"}    order
+ * @apiParamExample {text}
+ *      HTTP/1.1   GET  /list?offset=0&limit=5&order=ASC
+ *
+ * @apiSuccess (200 OK) {Object[]}
+ * @apiSuccess (200 OK) {Number}    id
+ * @apiSuccess (200 OK) {String}    name
+ * @apiSuccess (200 OK) {String}    description
+ * @apiSuccess (200 OK) {Date}      createdAt
+ * @apiSuccess (200 OK) {Date}      updatedAt
+ */
 const getPresentLists = async (event: APIGatewayEvent, context: Context) => {
+    let {
+        offset = 0,
+        limit = 10,
+        order = "DESC"
+    } = event.queryStringParameters;
     const services = context["services"];
 
     const presentLists: PresentList =
-        await services.presentService.getPresentLists();
+        await services.presentService.getPresentLists(
+            Number(offset),
+            Number(limit),
+            order
+        );
 
     return {
         statuscode: 200,
@@ -76,10 +128,15 @@ const createPresentList = async (event: APIGatewayEvent, context: Context) => {
  */
 const patchPresentList = async (event: APIGatewayEvent, context: Context) => {
     const listId = event.pathParameters["listId"];
+    const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
 
     const presentList: PresentList =
-        await services.presentService.patchPresentList(listId, event.body);
+        await services.presentService.getPresentList(listId);
+
+    console.log(presentList);
+
+    await services.presentService.patchPresentList(listId, event.body);
 
     return {
         statusCode: 200,

@@ -101,6 +101,14 @@ functions:
                   method: get
                   authorizer: auth
 
+    patchUserParticipate:
+        handler: src/controllers/index.patchUserParticipate
+        events:
+            - http:
+                  path: detail/{detailId}
+                  method: patch
+                  authorizer: auth
+
     getUserReceivedMessage:
         handler: src/controllers/index.getUserReceivedMessage
         events:

@@ -7,7 +7,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     ManyToMany,
-    JoinTable,
+    JoinTable
 } from "typeorm";
 
 import User from "./user";
@@ -18,7 +18,7 @@ export default class Participate {
     @PrimaryGeneratedColumn({
         name: "ID",
         type: "bigint",
-        unsigned: true,
+        unsigned: true
     })
     id: number;
 
@@ -26,9 +26,16 @@ export default class Participate {
         name: "MESSAGE",
         type: "nvarchar",
         length: 500,
-        nullable: false,
+        nullable: false
     })
     message: string;
+
+    @Column({
+        name: "CANCELED",
+        type: "boolean",
+        default: false
+    })
+    canceled: boolean;
 
     @ManyToOne((_) => User)
     @JoinColumn({ name: "USER_ID" })
@@ -39,12 +46,12 @@ export default class Participate {
     presentDetail: PresentDetail;
 
     @CreateDateColumn({
-        name: "CREATED_AT",
+        name: "CREATED_AT"
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        name: "UPDATED_AT",
+        name: "UPDATED_AT"
     })
     updatedAt: Date;
 }

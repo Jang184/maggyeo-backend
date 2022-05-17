@@ -5,7 +5,8 @@ import {
     getUserList,
     getUserParticipate,
     getUserReceivedMessage,
-    patchUser
+    patchUser,
+    patchUserParticipate
 } from "./User";
 
 import {
@@ -27,5 +28,6 @@ export {
     getPresentList,
     getPresentLists,
     createPresentList,
-    patchPresentList
+    patchPresentList,
+    patchUserParticipate
 };

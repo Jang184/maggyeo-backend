@@ -8,17 +8,21 @@ type signInInput = {
     password: string;
 };
 
-interface createUserInput {
+type createUserInput = {
     name: string;
     email: string;
     password: string;
     profileUrl?: string;
-}
+};
 
-interface patchUserInput {
+type patchUserInput = {
     name?: string;
     password?: string;
-}
+};
+
+type patchUserParticipateInput = {
+    message?: string;
+};
 
 export class UserService {
     userDao: UserDao;
@@ -69,11 +73,19 @@ export class UserService {
     getUserInfo(userId: number) {
         return this.userDao.getUserInfo(userId);
     }
-    getUserList(userId: number) {
-        return this.userDao.getUserList(userId);
+    getUserList(
+        userId: number,
+        offset: number,
+        limit: number,
+        order: "ASC" | "DESC"
+    ) {
+        return this.userDao.getUserList(userId, offset, limit, order);
     }
     getUserParticipate(userId: number) {
         return this.userDao.getUserParticipate(userId);
+    }
+    patchUserParticipate(partId: number, data) {
+        return this.userDao.patchUserParticipate(partId, data);
     }
     getUserReceivedMessage(userId: number) {
         return this.userDao.getUserReceivedMessage(userId);

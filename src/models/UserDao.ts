@@ -46,15 +46,17 @@ export default class UserDao {
         });
         return result;
     }
-    // TODO:pagination
-    async getUserList(userId: number) {
+
+    async getUserList(userId: number, offset, limit, order) {
         const result = await this.db.query(async (connection) => {
             // [{id:1, name:test, description:test, createdAt:...}]
             const userList: PresentList = await connection
                 .createQueryBuilder(PresentList, "list")
                 // .select(["list.id", "detail.id", "part.id"])
                 .leftJoinAndSelect("list.presentDetail", "detail")
-
+                .orderBy("list.createdAt", order)
+                .skip(offset)
+                .take(limit)
                 .where("list.user_id = :id", { id: userId })
                 .getMany();
 
@@ -96,6 +98,19 @@ export default class UserDao {
     async patchUser(userId, data) {
         const result = await this.db.withTransaction(async (qr) => {
             const update = await qr.manager.update(User, userId, data);
+
+            return update;
+        });
+        return result;
+    }
+
+    async patchUserParticipate(partId, data) {
+        const result = await this.db.withTransaction(async (qr) => {
+            const update = await qr.manager.upsert(
+                Participate,
+                [data],
+                ["partId"]
+            );
 
             return update;
         });
