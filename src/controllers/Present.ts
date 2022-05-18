@@ -6,7 +6,7 @@ import {
 } from "middy/middlewares";
 import { initMiddleware } from "../utils/middlewares";
 import { PresentList } from "../entities";
-import { APIGatewayEvent, Context } from "aws-lambda";
+import { APIGatewayEvent, Context, ProxyResult } from "aws-lambda";
 
 /**
  * @api {get}   /list/{listId}  Get Present List
@@ -22,6 +22,7 @@ import { APIGatewayEvent, Context } from "aws-lambda";
  * @apiSuccess  (200 OK)  {String}    description   description of list
  * @apiSuccess  (200 OK)  {Date}      createdAt     created date
  * @apiSuccess  (200 OK)  {Date}      updatedAt     updated date
+ * @apiSuccess  (200 OK)  {Number}    user          userId
  * @apiSuccess  (200 OK)  {Object[]}  presentDetail             Present Detail
  * @apiSuccess  (200 OK)  {Number}    presentDetail.id          id of detail
  * @apiSuccess  (200 OK)  {String}    presentDetail.url         url of detail
@@ -80,8 +81,25 @@ const getPresentLists = async (event: APIGatewayEvent, context: Context) => {
         );
 
     return {
-        statuscode: 200,
+        statusCode: 200,
         body: JSON.stringify(presentLists)
+    };
+};
+
+const getPresentDetail = async (
+    event: APIGatewayEvent,
+    context: Context
+): Promise<ProxyResult> => {
+    const detailId = event.pathParameters["detailId"];
+    const services = context["services"];
+
+    const presentDetail = await services.presentService.getPresentDetail(
+        detailId
+    );
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify(presentDetail)
     };
 };
 
@@ -89,6 +107,8 @@ const getPresentLists = async (event: APIGatewayEvent, context: Context) => {
  * @api {post}  /list   Create Present List
  * @apiName CreatePresentList
  * @apiGroup    PresentList
+ *
+ * @apiHeader   {String}    Authorization   authorization value
  *
  * @apiParam    (Body)  {String}    name            name of present list
  * @apiParam    (Body)  {String}    description     description of present list
@@ -116,6 +136,8 @@ const createPresentList = async (event: APIGatewayEvent, context: Context) => {
  * @apiName PatchPresentList
  * @apiGroup    PresentList
  *
+ * @apiHeader   {String}    Authorization   authorization value
+ *
  * @apiParam    (pathParam) {Number}    listId  list id
  * @apiParam    (Body)  {Object}    [presentList]       present list
  * @apiParam    (Body)  {String}    [presentList.name]  name of present list
@@ -131,10 +153,10 @@ const patchPresentList = async (event: APIGatewayEvent, context: Context) => {
     const userId = event.requestContext.authorizer["userId"];
     const services = context["services"];
 
-    const presentList: PresentList =
-        await services.presentService.getPresentList(listId);
+    const presentList = await services.presentService.getPresentList(listId);
 
-    console.log(presentList);
+    if (presentList.userId !== userId)
+        return { statusCode: 403, body: JSON.stringify("Forbidden") };
 
     await services.presentService.patchPresentList(listId, event.body);
 
@@ -186,10 +208,17 @@ const wrappedDeletePresentList = middy(deletePresentList)
     .use(jsonBodyParser())
     .use(initMiddleware());
 
+const wrappedGetPresentDetail = middy(getPresentDetail)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
 export {
     wrappedGetPresentList as getPresentList,
     wrappedGetPresentLists as getPresentLists,
     wrappedCreatePresentList as createPresentList,
     wrappedPatchPresentList as patchPresentList,
-    wrappedDeletePresentList as deletePresentList
+    wrappedDeletePresentList as deletePresentList,
+    wrappedGetPresentDetail as getPresentDetail
 };

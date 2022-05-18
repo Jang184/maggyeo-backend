@@ -47,4 +47,7 @@ export class PresentService {
     getPresentLists(offset: number, limit: number, order: "ASC" | "DESC") {
         return this.presentDao.getPresentLists(offset, limit, order);
     }
+    getPresentDetail(detailId: number) {
+        return this.presentDao.getPresentDetail(detailId);
+    }
 }

@@ -139,6 +139,13 @@ functions:
                   path: list
                   method: get
 
+    getPresentDetail:
+        handler: src/controllers/index.getPresentDetail
+        events:
+            - http:
+                  path: detail/{detailId}
+                  method: get
+
     patchPresentList:
         handler: src/controllers/index.patchPresentList
         events:

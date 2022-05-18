@@ -14,7 +14,8 @@ import {
     getPresentLists,
     createPresentList,
     patchPresentList,
-    deletePresentList
+    deletePresentList,
+    getPresentDetail
 } from "./Present";
 
 export {
@@ -29,5 +30,7 @@ export {
     getPresentLists,
     createPresentList,
     patchPresentList,
-    patchUserParticipate
+    patchUserParticipate,
+    getPresentDetail,
+    deletePresentList
 };
