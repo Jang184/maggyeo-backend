@@ -22,21 +22,31 @@ export default class PresentDao {
     }
     async patchPresentList(listId, data) {
         const result = await this.db.withTransaction(async (qr) => {
-            const test = await qr.manager.findOne(PresentList, { id: listId });
-            const update = await qr.manager.merge(PresentList, test, data);
-            console.log(update);
-            // const updateList = qr.manager.update(
-            //     PresentList,
-            //     listId,
-            //     data.presentList
-            // );
-            // const updateDetail = data.presentDetail.map((detail) => {
-            //     const detailId = detail.id;
-            //     return qr.manager.update(PresentDetail, detailId, detail);
-            // });
+            const updateList = qr.manager.update(
+                PresentList,
+                listId,
+                data.presentList
+            );
+            const updateDetail = data.presentDetail.map((detail) => {
+                const detailId: number = detail.id;
+                // return qr.manager.update(PresentDetail, detailId, detail);
+                return qr.manager
+                    .createQueryBuilder()
+                    .update(PresentDetail)
+                    .set(detail)
+                    .where("id= :detailId", { detailId: detailId })
+                    .andWhere("presentList= :listId", { listId: listId })
+                    .execute();
+            });
 
-            // const update = await Promise.all([updateList, ...updateDetail]);
-            await qr.manager.save(update);
+            const update = await Promise.all([updateList, ...updateDetail]);
+
+            // const test = await qr.manager
+            //     .createQueryBuilder(PresentDetail, "detail")
+            //     .where("detail.id = :detailId", { detailId: 1 })
+            //     .andWhere("detail.presentList = :listId", { listId: listId })
+            //     .getMany();
+            // console.log("print:", test);
             return;
         });
         return result;

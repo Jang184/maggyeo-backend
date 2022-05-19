@@ -5,20 +5,17 @@ import {
     ManyToOne,
     JoinColumn,
     CreateDateColumn,
-    UpdateDateColumn,
-    Generated,
-    OneToMany,
+    UpdateDateColumn
 } from "typeorm";
-import { Participate } from ".";
 
-import presentList from "./presentList";
+import PresentList from "./presentList";
 
 @Entity("PRESENT_DETAIL")
 export default class PresentDetail {
     @PrimaryGeneratedColumn({
         name: "ID",
         type: "bigint",
-        unsigned: true,
+        unsigned: true
     })
     id: number;
 
@@ -26,7 +23,7 @@ export default class PresentDetail {
         name: "URL",
         type: "varchar",
         length: 500,
-        nullable: false,
+        nullable: false
     })
     url: string;
 
@@ -34,21 +31,21 @@ export default class PresentDetail {
         name: "PRICE",
         type: "decimal",
         precision: 10,
-        scale: 2,
+        scale: 2
     })
     price: number;
 
     @Column({
         name: "DESCRIPTION",
         type: "nvarchar",
-        length: 1000,
+        length: 1000
     })
     description: string;
 
     @Column({
         name: "COUNT_LIMIT",
         type: "int",
-        unsigned: true,
+        unsigned: true
     })
     countLimit: number;
 
@@ -56,21 +53,24 @@ export default class PresentDetail {
         name: "COUNT_NOW",
         type: "int",
         unsigned: true,
-        default: 0,
+        default: 0
     })
     countNow: number;
 
-    @ManyToOne((_) => presentList)
+    @ManyToOne((type) => PresentList, {
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE"
+    })
     @JoinColumn({ name: "LIST_ID" })
-    presentList: presentList;
+    presentList: PresentList;
 
     @CreateDateColumn({
-        name: "CREATED_AT",
+        name: "CREATED_AT"
     })
     createdAt: Date;
 
     @UpdateDateColumn({
-        name: "UPDATED_AT",
+        name: "UPDATED_AT"
     })
     updatedAt: Date;
 }

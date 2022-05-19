@@ -195,5 +195,4 @@ resources:
 plugins:
     - serverless-webpack
     - serverless-dotenv-plugin
-    - serverless-plugin-typescript
     - serverless-offline

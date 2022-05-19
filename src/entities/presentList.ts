@@ -47,7 +47,7 @@ export default class PresentList {
     @OneToMany(
         () => PresentDetail,
         (presentDetail) => presentDetail.presentList,
-        { cascade: ["insert", "update"], eager: true }
+        { cascade: true, eager: true }
     )
     presentDetail: PresentDetail[];
 
