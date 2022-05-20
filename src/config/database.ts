@@ -54,19 +54,17 @@ export const getConnection = async () => {
 };
 
 export class Database {
-    constructor(private connection: Connection) {
-        this.connection = connection;
-    }
+    constructor(private connection: Connection) {}
 
-    public async getConnection() {
+    async getConnection() {
         return this.connection;
     }
 
-    public async query(action) {
+    async query(action) {
         return await action(this.connection);
     }
 
-    public async withTransaction(action) {
+    async withTransaction(action) {
         const queryRunner: QueryRunner = this.connection.createQueryRunner();
 
         await queryRunner.connect();

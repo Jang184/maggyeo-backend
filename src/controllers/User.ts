@@ -13,10 +13,10 @@ import { APIGatewayEvent, Context, ProxyResult } from "aws-lambda";
  * @apiName SignUp
  * @apiGroup User
  *
- * @apiParam (Body) {String}    name        user's name
- * @apiParam (Body) {String}    email       user's email
- * @apiParam (Body) {String}    password    user's password
- * @apiParam (Body) {String}    profileUrl  user's profile image url
+ * @apiBody {String}    name        user's name
+ * @apiBody {String}    email       user's email
+ * @apiBody {String}    password    user's password
+ * @apiBody {String}    profileUrl  user's profile image url
  * @apiParamExample {json}  SignUpRequest
  *      {
  *          "name" : "testUser",
@@ -55,8 +55,8 @@ const signUp = async (
  * @apiName SignIn
  * @apiGroup User
  *
- * @apiParam (Body) {String}    email       user's email
- * @apiParam (Body) {String}    password    user's password
+ * @apiBody {String}    email       user's email
+ * @apiBody {String}    password    user's password
  * @apiParamExample {json}  SignInRequest
  *      {
  *          "email" : "testUser@gmail.com",
@@ -135,9 +135,9 @@ const getUserInfo = async (
  * @apiName GetUserList
  * @apiGroup User
  *
- * @apiParam   (QueryStringParam) {Number}  offset=0
- * @apiParam   (QueryStringParam) {Number}  limit=5
- * @apiParam   (QueryStringParam) {String="ASC","DESC"}  order
+ * @apiParam   (QueryStringParam) {Number}  [offset=0]
+ * @apiParam   (QueryStringParam) {Number}  [limit=5]
+ * @apiParam   (QueryStringParam) {String="ASC","DESC"}  [order]
  *
  *
  * @apiSuccess (200 OK) {Number}    id                  unique id of list
@@ -181,8 +181,6 @@ const getUserList = async (event: APIGatewayEvent, context: Context) => {
  * @api {get}   /user/participate   Get User's participation
  * @apiName GetUserParticipate
  * @apiGroup User
- *
- * @apiSuccess  (200 OK)    {}
  */
 const getUserParticipate = async (event: APIGatewayEvent, context: Context) => {
     const userId = event.requestContext.authorizer["userId"];

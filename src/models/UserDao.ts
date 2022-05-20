@@ -2,9 +2,7 @@ import { Participate, PresentList, User } from "../entities";
 import { Database } from "../config/database";
 
 export default class UserDao {
-    constructor(private db: Database) {
-        this.db = db;
-    }
+    constructor(private db: Database) {}
 
     async createUser(data) {
         const result = await this.db.withTransaction(async (qr) => {

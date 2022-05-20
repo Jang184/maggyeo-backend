@@ -9,7 +9,7 @@ import { PresentList } from "../entities";
 import { APIGatewayEvent, Context, ProxyResult } from "aws-lambda";
 
 /**
- * @api {get}   /list/{listId}  Get Present List
+ * @api {get}   /list/:listId  Get Present List
  * @apiName GetPresentList
  * @apiGroup Present
  *
@@ -52,13 +52,13 @@ const getPresentList = async (event: APIGatewayEvent, context: Context) => {
  * @apiName GetAllPresentList
  * @apiGroup Present
  *
- * @apiParam  (QueryStringParam)    {Number}    offset
- * @apiParam  (QueryStringParam)    {Number}    limit
- * @apiParam  (QueryStringParam)    {String="DESC","ASC"}    order
+ * @apiParam  (QueryStringParam)    {Number}    [offset=0]
+ * @apiParam  (QueryStringParam)    {Number}    [limit=10]
+ * @apiParam  (QueryStringParam)    {String="DESC","ASC"}    [order]
  * @apiParamExample {text}
  *      HTTP/1.1   GET  /list?offset=0&limit=5&order=ASC
  *
- * @apiSuccess (200 OK) {Object[]}
+ * @apiSuccess (200 OK) {Object[]}  something
  * @apiSuccess (200 OK) {Number}    id
  * @apiSuccess (200 OK) {String}    name
  * @apiSuccess (200 OK) {String}    description
@@ -110,13 +110,14 @@ const getPresentDetail = async (
  *
  * @apiHeader   {String}    Authorization   authorization value
  *
- * @apiParam    (Body)  {String}    name            name of present list
- * @apiParam    (Body)  {String}    description     description of present list
- * @apiParam    (Body)  {Object[]}  presentDetail   detail of present List
- * @apiParam    (Body)  {String}    presentDetail.url           url of present detail
- * @apiParam    (Body)  {String}    presentDetail.description   description of present detail
- * @apiParam    (Body)  {Number}    presentDetail.countLimit   count limit of present detail
- * @apiParam    (Body)  {Number}    presentDetail.price         price of present detail
+ * @apiBody     {String}    name            name of present list
+ * @apiBody     {String}    description     description of present list
+ * @apiBody     {Object[]}  presentDetail   detail of present List
+ * @apiBody     {String}    presentDetail.url           url of present detail
+ * @apiBody     {String}    presentDetail.description   description of present detail
+ * @apiBody     {Number}    presentDetail.countLimit   count limit of present detail
+ * @apiBody     {Number}    presentDetail.price         price of present detail
+ *
  */
 const createPresentList = async (event: APIGatewayEvent, context: Context) => {
     const userId = event.requestContext.authorizer["userId"];
@@ -132,7 +133,7 @@ const createPresentList = async (event: APIGatewayEvent, context: Context) => {
 };
 
 /**
- * @api {patch}  /list/{listId}   Patch Present List
+ * @api {patch}  /list/:listId   Patch Present List
  * @apiName PatchPresentList
  * @apiGroup    PresentList
  *

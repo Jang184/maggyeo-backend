@@ -27,9 +27,7 @@ type patchUserParticipateInput = {
 export class UserService {
     userDao: UserDao;
 
-    constructor(userDao: UserDao) {
-        this.userDao = userDao;
-    }
+    constructor(userDao: UserDao) {}
     async signUp(data: createUserInput) {
         const hashedPassword = await this.generateHashedPassword(data.password);
         const userInfo = Object.assign(data, { password: hashedPassword });
