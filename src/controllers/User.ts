@@ -8,7 +8,7 @@ import {
 import { initMiddleware } from "../utils/middlewares";
 import { User, PresentList } from "../entities";
 import { APIGatewayEvent, Context, ProxyResult, S3Event } from "aws-lambda";
-import { getRandomKey } from "../utils/random";
+import { getObjectKey } from "../utils/random";
 
 /**
  * @api {post}  /signin     Sign Up
@@ -53,7 +53,7 @@ const signUp = async (
 const getUploadUrl = async (event: APIGatewayEvent): Promise<ProxyResult> => {
     const userId = event.requestContext.authorizer["userId"];
     const URL_EXPIRATION_SECONDS = 300;
-    const randomKey = `user/${userId}/${getRandomKey()}.jpg`;
+    const randomKey = getObjectKey(userId);
 
     const s3 = new AWS.S3();
 
@@ -61,7 +61,8 @@ const getUploadUrl = async (event: APIGatewayEvent): Promise<ProxyResult> => {
         Bucket: process.env.USER_BUCKET,
         Key: randomKey,
         Expires: URL_EXPIRATION_SECONDS,
-        ContentType: "image/jpeg"
+        ContentType: "image/jpeg",
+        ACL: "public-read"
     };
 
     const uploadUrl = await s3.getSignedUrlPromise("putObject", s3Params);

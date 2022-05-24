@@ -25,9 +25,7 @@ type patchUserParticipateInput = {
 };
 
 export class UserService {
-    userDao: UserDao;
-
-    constructor(userDao: UserDao) {}
+    constructor(private userDao: UserDao) {}
     async signUp(data: createUserInput) {
         const hashedPassword = await this.generateHashedPassword(data.password);
         const userInfo = Object.assign(data, { password: hashedPassword });
@@ -59,9 +57,9 @@ export class UserService {
 
             const user = await this.userDao.createUser({
                 name: data.name,
-                email: data.email,
-                profileUrl: data.picture
+                email: data.email
             });
+            // TODO :: url to image
 
             return this.generateToken(user.id);
         } catch (err) {

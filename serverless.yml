@@ -6,16 +6,16 @@ custom:
     prune:
         automatic: true
         number: 1
-    # vpc:
-    #     dev:
-    #         securityGroupIds: []
-    #         subnetIds: []
-    #     prod:
-    #         securityGroupIds:
-    #             - ${env:LAMBDA_SG}
-    #         subnetIds:
-    #             - ${env:LAMBDA_SUBNET_ID1}
-    #             - ${env:LAMBDA_SUBNET_ID2}
+    vpc:
+        dev:
+            securityGroupIds: []
+            subnetIds: []
+        prod:
+            securityGroupIds:
+                - ${env:LAMBDA_SG, ''}
+            subnetIds:
+                - ${env:LAMBDA_SUBNET_ID1, ''}
+                - ${env:LAMBDA_SUBNET_ID2, ''}
     webpackConfig:
         dev:
             webpackConfig: "./webpack.dev.js"
@@ -37,13 +37,13 @@ provider:
     profile: maggyeo-backend
     environment:
         stage: ${self:provider.stage}
-    # vpc: ${self:custom.vpc.${opt:stage, 'dev'}}
-    vpc:
-        securityGroupIds:
-            - sg-0cccb6b8e75dcfb4d
-        subnetIds:
-            - subnet-01dea442a462c5b2a
-            - subnet-0e07375409c2f56e8
+    vpc: ${self:custom.vpc.${opt:stage, 'dev'}}
+    # vpc:
+    #     securityGroupIds:
+    #         - sg-0cccb6b8e75dcfb4d
+    #     subnetIds:
+    #         - subnet-01dea442a462c5b2a
+    #         - subnet-0e07375409c2f56e8
 
     iamRoleStatements:
         - Effect: "Allow"
@@ -72,7 +72,7 @@ functions:
         events:
             - http:
                   path: user/profile
-                  method: post
+                  method: get
                   authorizer: auth
 
     signIn:
@@ -182,7 +182,7 @@ functions:
         handler: src/controllers/index.s3Trigger
         events:
             - s3:
-                  bucket: ${env:USER_BUCKET}
+                  bucket: ${env:USER_BUCKET, ''}
                   event: s3:ObjectCreated:*
                   existing: true
 resources:
