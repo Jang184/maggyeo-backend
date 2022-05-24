@@ -110,4 +110,9 @@ export class UserService {
 
         return hashedPassword;
     }
+    updateUserProfileURL(bucket: string, key: string) {
+        const userId = parseInt(key.split("/")[1]);
+        const profileUrl = `https://${bucket}.s3.ap-northeast-2.amazonaws.com/${key}`;
+        return this.userDao.patchUser(userId, { profileUrl });
+    }
 }

@@ -67,6 +67,14 @@ functions:
                   path: signup
                   method: post
 
+    getUploadUrl:
+        handler: src/controllers/index.getUploadUrl
+        events:
+            - http:
+                  path: user/profile
+                  method: post
+                  authorizer: auth
+
     signIn:
         handler: src/controllers/index.signIn
         events:
@@ -169,6 +177,14 @@ functions:
                   path: list/{listId}
                   method: delete
                   authorizer: auth
+
+    s3Trigger:
+        handler: src/controllers/index.s3Trigger
+        events:
+            - s3:
+                  bucket: ${env:USER_BUCKET}
+                  event: s3:ObjectCreated:*
+                  existing: true
 resources:
     Resources:
         # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯

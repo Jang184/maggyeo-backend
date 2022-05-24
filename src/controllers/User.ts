@@ -1,4 +1,5 @@
 import middy from "middy";
+import AWS from "aws-sdk";
 import {
     doNotWaitForEmptyEventLoop,
     httpHeaderNormalizer,
@@ -6,7 +7,8 @@ import {
 } from "middy/middlewares";
 import { initMiddleware } from "../utils/middlewares";
 import { User, PresentList } from "../entities";
-import { APIGatewayEvent, Context, ProxyResult } from "aws-lambda";
+import { APIGatewayEvent, Context, ProxyResult, S3Event } from "aws-lambda";
+import { getRandomKey } from "../utils/random";
 
 /**
  * @api {post}  /signin     Sign Up
@@ -16,13 +18,11 @@ import { APIGatewayEvent, Context, ProxyResult } from "aws-lambda";
  * @apiBody {String}    name        user's name
  * @apiBody {String}    email       user's email
  * @apiBody {String}    password    user's password
- * @apiBody {String}    profileUrl  user's profile image url
  * @apiParamExample {json}  SignUpRequest
  *      {
  *          "name" : "testUser",
  *          "email" : "testUser@gmail.com",
- *          "password" : "testUser",
- *          "profileUrl" : "testUser.com"
+ *          "password" : "testUser"
  *       }
  *
  * @apiSuccess (200 OK) {String}    message
@@ -48,6 +48,39 @@ const signUp = async (
             message: "signup success"
         })
     };
+};
+
+const getUploadUrl = async (event: APIGatewayEvent): Promise<ProxyResult> => {
+    const userId = event.requestContext.authorizer["userId"];
+    const URL_EXPIRATION_SECONDS = 300;
+    const randomKey = `user/${userId}/${getRandomKey()}.jpg`;
+
+    const s3 = new AWS.S3();
+
+    const s3Params = {
+        Bucket: process.env.USER_BUCKET,
+        Key: randomKey,
+        Expires: URL_EXPIRATION_SECONDS,
+        ContentType: "image/jpeg"
+    };
+
+    const uploadUrl = await s3.getSignedUrlPromise("putObject", s3Params);
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            uploadUrl
+        })
+    };
+};
+
+const s3Trigger = async (event: S3Event, context: Context): Promise<void> => {
+    const services = context["services"];
+
+    const bucket = event.Records[0].s3.bucket.name;
+    const key = event.Records[0].s3.object.key;
+
+    await services.userService.updateUserProfileURL(bucket, key);
 };
 
 /**
@@ -270,6 +303,11 @@ const wrappedSignUp = middy(signUp)
     .use(jsonBodyParser())
     .use(initMiddleware());
 
+const wrappedGetUploadUrl = middy(getUploadUrl)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser());
+
 const wrappedSignIn = middy(signIn)
     .use(httpHeaderNormalizer())
     .use(doNotWaitForEmptyEventLoop())
@@ -312,6 +350,12 @@ const wrappedPatchUserParticipate = middy(patchUserParticipate)
     .use(jsonBodyParser())
     .use(initMiddleware());
 
+const wrappedS3Trigger = middy(s3Trigger)
+    .use(httpHeaderNormalizer())
+    .use(doNotWaitForEmptyEventLoop())
+    .use(jsonBodyParser())
+    .use(initMiddleware());
+
 export {
     wrappedSignUp as signUp,
     wrappedSignIn as signIn,
@@ -320,5 +364,7 @@ export {
     wrappedGetUserParticipate as getUserParticipate,
     wrappedGetUserReceivedMessage as getUserReceivedMessage,
     wrappedPatchUser as patchUser,
-    wrappedPatchUserParticipate as patchUserParticipate
+    wrappedPatchUserParticipate as patchUserParticipate,
+    wrappedGetUploadUrl as getUploadUrl,
+    wrappedS3Trigger as s3Trigger
 };

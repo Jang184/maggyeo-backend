@@ -6,7 +6,9 @@ import {
     getUserParticipate,
     getUserReceivedMessage,
     patchUser,
-    patchUserParticipate
+    patchUserParticipate,
+    getUploadUrl,
+    s3Trigger
 } from "./User";
 
 import {
@@ -32,5 +34,7 @@ export {
     patchPresentList,
     patchUserParticipate,
     getPresentDetail,
-    deletePresentList
+    deletePresentList,
+    getUploadUrl,
+    s3Trigger
 };
