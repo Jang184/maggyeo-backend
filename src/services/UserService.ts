@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 import bcrypt from "bcryptjs";
 import { UserDao } from "../models";
+import { S3UploadImple } from "../utils/s3Upload";
 
 type signInInput = {
     email: string;
@@ -60,7 +61,12 @@ export class UserService {
                 email: data.email
             });
             // TODO :: url to image
-
+            const s3upload = new S3UploadImple(user.id);
+            const profileURL = await s3upload.URLToImage(
+                process.env.USER_BUCKET,
+                data.picture
+            );
+            await this.userDao.patchUser(user.id, { profileURL });
             return this.generateToken(user.id);
         } catch (err) {
             throw new Error("INVALID_TOKEN");

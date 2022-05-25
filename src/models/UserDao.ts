@@ -10,7 +10,7 @@ export default class UserDao {
 
             return user;
         });
-        return result;
+        return result.identifiers[0];
     }
     async getUserByEmail(email) {
         const result = await this.db.query(async (connection) => {

@@ -8,7 +8,7 @@ import {
 import { initMiddleware } from "../utils/middlewares";
 import { User, PresentList } from "../entities";
 import { APIGatewayEvent, Context, ProxyResult, S3Event } from "aws-lambda";
-import { getObjectKey } from "../utils/random";
+import { S3UploadImple } from "../utils/s3Upload";
 
 /**
  * @api {post}  /signin     Sign Up
@@ -40,7 +40,7 @@ const signUp = async (
 ): Promise<ProxyResult> => {
     const services = context["services"];
 
-    await services.userService.signUp(event.body);
+    const userInfo = await services.userService.signUp(event.body);
 
     return {
         statusCode: 201,
@@ -52,25 +52,14 @@ const signUp = async (
 
 const getUploadUrl = async (event: APIGatewayEvent): Promise<ProxyResult> => {
     const userId = event.requestContext.authorizer["userId"];
-    const URL_EXPIRATION_SECONDS = 300;
-    const randomKey = getObjectKey(userId);
 
-    const s3 = new AWS.S3();
-
-    const s3Params = {
-        Bucket: process.env.USER_BUCKET,
-        Key: randomKey,
-        Expires: URL_EXPIRATION_SECONDS,
-        ContentType: "image/jpeg",
-        ACL: "public-read"
-    };
-
-    const uploadUrl = await s3.getSignedUrlPromise("putObject", s3Params);
+    const S3Upload = new S3UploadImple(userId);
+    const URL = S3Upload.getPresignedURL(process.env.USER_BUCKET);
 
     return {
         statusCode: 200,
         body: JSON.stringify({
-            uploadUrl
+            URL
         })
     };
 };
