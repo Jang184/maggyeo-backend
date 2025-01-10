@@ -6,8 +6,16 @@
 
 **Backend**
 
--   TypeScript
--   Node.js
--   TypeORM
--   Serverless framework
--   AWS
+- TypeScript
+- Node.js
+- TypeORM
+- Serverless framework
+- AWS
+
+## 인프라 구축
+
+![](./cloud-infra-structure.png)
+
+## 기능
+
+![](./api-flow.jpg)
